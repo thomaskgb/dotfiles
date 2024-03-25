@@ -1,0 +1,7 @@
+.DS_Store
+.vscode
+prefs.plist
+.env
+*/__pycache__/*
+*.pyc
+*.log
