@@ -11,7 +11,7 @@ export ZSH="$XDG_CONFIG_HOME/zsh/oh-my-zsh"
 export ZSH_CUSTOM="$ZSH/custom"
 ZSH_THEME=powerlevel10k/powerlevel10k
 
-plugins=(git pip command-not-found copypath copyfile web-search macos zsh-syntax-highlighting zsh-autosuggestions zsh-autocomplete vi-mode)
+plugins=(git pip command-not-found copypath copyfile web-search macos zsh-syntax-highlighting zsh-autosuggestions zsh-autocomplete)
 
 ## ohmyzsh config
 source $ZSH/oh-my-zsh.sh
