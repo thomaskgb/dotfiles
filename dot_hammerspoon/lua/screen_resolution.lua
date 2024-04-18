@@ -1,5 +1,7 @@
 
-local function toggleScreenResolution()
+local functions = {}
+
+function functions.toggleScreenResolution()
 	-- Get the primary screen
 	local screen = hs.screen.primaryScreen()
 
@@ -24,7 +26,7 @@ local function toggleScreenResolution()
 		-- Switch to resolution3
 		screen:setMode(resolution1.w, resolution1.h, resolution1.scale, resolution1.freq, resolution1.bpp)
 		print(string.format("Switched to resolution: %dx%d @ %dHz", resolution1.w, resolution1.h, resolution1.freq))
-	end
+	end	
 end
 
 
@@ -36,7 +38,9 @@ local function menuBar()
 end
 
 -- Set the click callback for the menubar item
-menuBarItem:setClickCallback(toggleScreenResolution)
+menuBarItem:setClickCallback(functions.toggleScreenResolution)
 
 -- Initialize the menubar item title
 menuBar()
+
+return functions
