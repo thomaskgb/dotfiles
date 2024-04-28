@@ -1,3 +1,4 @@
-[source]
-autoAdd = true
+[edit]
+  watch = true
+
 
