@@ -618,7 +618,7 @@ require("lazy").setup({
 					--  This will auto-import if your LSP supports it.
 					--  This will expand snippets if the LSP sent a snippet.
 					["<C-y>"] = cmp.mapping.confirm({ select = true }),
-
+					["<Tab>"] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. If none selected, select the first item.
 					-- Manually trigger a completion from nvim-cmp.
 					--  Generally you don't need this, because nvim-cmp will display
 					--  completions whenever it has completion options available.
@@ -792,3 +792,4 @@ require("lazy").setup({
 
 -- reload init.lua using keymap
 -- could use :source $MYVIMRC
+-- vim.keymap.set("n", "<Leader>r", reloadConfig, { noremap = true, silent = true })
