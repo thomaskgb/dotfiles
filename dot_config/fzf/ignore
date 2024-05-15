@@ -1,0 +1,12 @@
+Library
+Applications
+.git
+.DS_Store
+.zsh_sessions
+.chatgpt
+.cache
+.pyenv
+.platformio
+.stack
+.local
+.docker
