@@ -21,5 +21,6 @@ export PATH="$HOME/.pyenv/bin:$PATH"
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 
-#fzf install zsh configuration
-eval "$(fzf --zsh)"
+# fzf configuration
+source "$XDG_CONFIG_HOME/fzf/fzf.zsh"
+bindkey '^o' fzf-cd-widget
