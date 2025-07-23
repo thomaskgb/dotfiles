@@ -1,0 +1,8 @@
+README.md
+
+{{- if ne .chezmoi.os "darwin" }}
+# macOS-specific configs - ignore on non-macOS systems
+.config/hammerspoon/
+.config/yabai/
+.config/karabiner/
+{{- end }}

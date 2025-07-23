@@ -5,7 +5,7 @@ HYPER = { "cmd", "alt", "ctrl", "shift" }
 
 -- Terminal launcher (space and 2)
 local launchTerminal = function()
-	hs.execute("/Users/thomas/.config/hammerspoon/launch_show_hide.sh iTerm")
+	hs.execute("~/.config/hammerspoon/launch_show_hide.sh iTerm")
 end
 hs.hotkey.bind(HYPER, "space", launchTerminal)
 hs.hotkey.bind(HYPER, "2", launchTerminal)
@@ -21,13 +21,13 @@ end)
 
 -- Todoist launcher (5 and t)
 local launchTodoist = function()
-	hs.execute("/Users/thomas/.config/hammerspoon/launch_show_hide.sh Todoist")
+	hs.execute("~/.config/hammerspoon/launch_show_hide.sh Todoist")
 end
 hs.hotkey.bind(HYPER, "5", launchTodoist)
 hs.hotkey.bind(HYPER, "t", launchTodoist)
 
 hs.hotkey.bind(HYPER, "4", function()
-	hs.execute("/Users/thomas/.config/hammerspoon/launch_show_hide.sh Obsidian")
+	hs.execute("~/.config/hammerspoon/launch_show_hide.sh Obsidian")
 end)
 
 hs.hotkey.bind(HYPER, "s", function()

@@ -3,6 +3,6 @@
 	name = thomas
 [core]
 	editor = vim
-	excludesfile = /Users/thomas/.config/git/gitignore
+	excludesfile = ~/.config/git/gitignore
 [pull]
 	rebase = False

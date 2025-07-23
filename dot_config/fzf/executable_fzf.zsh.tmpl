@@ -1,0 +1,37 @@
+# Setup fzf - Cross-platform configuration
+# ---------
+
+{{- if eq .chezmoi.os "darwin" }}
+# macOS - Detect Homebrew installation
+if [[ -d "/opt/homebrew/opt/fzf" ]]; then
+    # Apple Silicon Homebrew
+    FZF_BASE="/opt/homebrew/opt/fzf"
+elif [[ -d "/usr/local/opt/fzf" ]]; then
+    # Intel Homebrew
+    FZF_BASE="/usr/local/opt/fzf"
+fi
+
+if [[ -n "$FZF_BASE" ]]; then
+    # Add to PATH if not already there
+    if [[ ! "$PATH" == *${FZF_BASE}/bin* ]]; then
+        PATH="${PATH:+${PATH}:}${FZF_BASE}/bin"
+    fi
+    
+    # Auto-completion
+    [[ $- == *i* ]] && source "${FZF_BASE}/shell/completion.zsh" 2> /dev/null
+    
+    # Key bindings
+    source "${FZF_BASE}/shell/key-bindings.zsh"
+fi
+{{- else }}
+# Linux - Use system installation
+if [[ -f "/usr/share/fzf/completion.zsh" ]]; then
+    # Ubuntu/Debian package manager
+    source "/usr/share/fzf/completion.zsh" 2> /dev/null
+    source "/usr/share/fzf/key-bindings.zsh"
+elif [[ -f "/usr/share/doc/fzf/examples/completion.zsh" ]]; then
+    # Alternative Debian path
+    source "/usr/share/doc/fzf/examples/completion.zsh" 2> /dev/null
+    source "/usr/share/doc/fzf/examples/key-bindings.zsh"
+fi
+{{- end }}
