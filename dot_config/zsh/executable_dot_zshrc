@@ -16,11 +16,13 @@ source "$XDG_CONFIG_HOME/zsh/aliases.zsh"
 # enable strongbox ssh socket
 SSH_AUTH_SOCK=~/.config/strongbox/agent.sock
 
+bindkey '^o' fzf-cd-widget
+
 ## pyenv configuration
 export PATH="$HOME/.pyenv/bin:$PATH"
 eval "$(pyenv init -)"
 eval "$(pyenv virtualenv-init -)"
 
-# fzf configuration
-source "$XDG_CONFIG_HOME/fzf/fzf.zsh"
-bindkey '^o' fzf-cd-widget
+#fzf install zsh configuration
+eval "$(fzf --zsh)"
+
