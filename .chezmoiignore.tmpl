@@ -1,5 +1,20 @@
 README.md
 
+# oh-my-zsh cache and log directories
+.config/zsh/oh-my-zsh/cache/
+.config/zsh/oh-my-zsh/log/
+
+# zinit plugins and completions (auto-downloaded)
+.local/share/zinit/plugins/
+.local/share/zinit/completions/
+
+# tmux plugins (auto-downloaded by TPM) - except tpm itself
+.config/tmux/plugins/*
+!.config/tmux/plugins/tpm/
+
+# tmux resurrect saved sessions
+.config/tmux/resurrect/
+
 {{- if ne .chezmoi.os "darwin" }}
 # macOS-specific configs - ignore on non-macOS systems
 .config/hammerspoon/
