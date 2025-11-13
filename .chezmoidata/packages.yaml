@@ -1,0 +1,55 @@
+packages:
+  darwin:
+    brews:
+      # Core tools
+      - neovim
+      - tmux
+      - git
+      - gh
+      - fzf
+      - ripgrep
+      - fd
+
+      # Development
+      - pyenv
+      - pyenv-virtualenv
+      - node
+
+      # Terminal utilities
+      - lazygit
+      - ranger
+      - btop
+      - bat
+      - eza
+
+    casks:
+      - hammerspoon
+      - karabiner-elements
+
+  linux:
+    apt:
+      # Core tools
+      - neovim
+      - tmux
+      - git
+      - fzf
+      - ripgrep
+      - fd-find
+      - curl
+      - wget
+      - build-essential
+
+      # Python
+      - python3
+      - python3-pip
+
+      # Terminal utilities
+      - zsh
+      - ranger
+      - bat
+
+    # Tools installed separately (not in apt)
+    manual:
+      - gh          # GitHub CLI
+      - pyenv       # Python version manager
+      - lazygit     # Terminal UI for git

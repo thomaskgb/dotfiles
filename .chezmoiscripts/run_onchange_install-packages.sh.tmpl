@@ -1,0 +1,78 @@
+#!/bin/bash
+# Install packages defined in .chezmoidata/packages.yaml
+# This script runs when the package list changes
+
+set -e
+
+{{ if eq .chezmoi.os "darwin" -}}
+echo "Installing macOS packages via Homebrew..."
+
+# Check for Homebrew
+if ! command -v brew &>/dev/null; then
+    echo "Homebrew not found. Please install it first:"
+    echo '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
+    exit 1
+fi
+
+# Install brews
+{{ range .packages.darwin.brews -}}
+brew install {{ . }} || true
+{{ end }}
+
+# Install casks
+{{ range .packages.darwin.casks -}}
+brew install --cask {{ . }} || true
+{{ end }}
+
+echo "macOS packages installed!"
+
+{{ else if eq .chezmoi.os "linux" -}}
+echo "Installing Linux packages via apt..."
+
+# Update package lists
+sudo apt update
+
+# Install apt packages
+{{ range .packages.linux.apt -}}
+sudo apt install -y {{ . }} || true
+{{ end }}
+
+# Install manual packages
+echo "Installing additional tools..."
+
+# GitHub CLI
+if ! command -v gh &>/dev/null; then
+    echo "Installing GitHub CLI..."
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+    sudo apt update
+    sudo apt install -y gh
+fi
+
+# pyenv
+if ! command -v pyenv &>/dev/null; then
+    echo "Installing pyenv..."
+    curl https://pyenv.run | bash
+fi
+
+# lazygit
+if ! command -v lazygit &>/dev/null; then
+    echo "Installing lazygit..."
+    LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+    curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
+    tar xf lazygit.tar.gz lazygit
+    sudo install lazygit /usr/local/bin
+    rm lazygit lazygit.tar.gz
+fi
+
+echo "Linux packages installed!"
+
+{{ end -}}
+
+# Install tmux plugins
+if [ -d "$HOME/.config/tmux/plugins/tpm" ]; then
+    echo "Installing tmux plugins..."
+    "$HOME/.config/tmux/plugins/tpm/bin/install_plugins"
+fi
+
+echo "Package installation complete!"
