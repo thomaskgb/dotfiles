@@ -21,10 +21,9 @@ autoload -Uz _zinit
 zinit ice depth=1
 zinit light romkatv/powerlevel10k
 
-# Load external plugins
+# Load external plugins (except autocomplete - must load after oh-my-zsh)
 zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-autosuggestions
-zinit light marlonrichert/zsh-autocomplete
 
 ### oh-my-zsh configuration (built-in plugins only) ###
 export ZSH="$XDG_CONFIG_HOME/zsh/oh-my-zsh"
@@ -39,6 +38,9 @@ DISABLE_AUTO_UPDATE="true"
 source "$XDG_CONFIG_HOME/zsh/variables.zsh"
 source "$ZSH/oh-my-zsh.sh"
 source "$XDG_CONFIG_HOME/zsh/aliases.zsh"
+
+# Load autocomplete AFTER oh-my-zsh to prevent keybinding conflicts
+zinit light marlonrichert/zsh-autocomplete
 
 # Load p10k theme config
 [[ ! -f $XDG_CONFIG_HOME/zsh/p10k.zsh ]] || source $XDG_CONFIG_HOME/zsh/p10k.zsh
