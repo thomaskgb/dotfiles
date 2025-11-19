@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.chezmoi.io)",
+      "Bash(chezmoi add:*)",
+      "Bash(chezmoi apply:*)",
+      "Bash(zsh -i -c 'echo \"\"\"\"=== Test Results ===\"\"\"\" && echo \"\"\"\"Zinit installed: $(test -d ~/.local/share/zinit/zinit.git && echo YES || echo NO)\"\"\"\" && echo \"\"\"\"ZSH (oh-my-zsh): $ZSH\"\"\"\" && echo \"\"\"\"Syntax highlighting: $(test -d ~/.local/share/zinit/plugins/zsh-users---zsh-syntax-highlighting && echo LOADED || echo NOT_LOADED)\"\"\"\" && echo \"\"\"\"=== Test complete ===\"\"\"\"')",
+      "Bash(zsh -i -c 'echo \"\"\"\"Loaded successfully\"\"\"\"')",
+      "Bash(cat:*)",
+      "WebFetch(domain:www.hammerspoon.org)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
