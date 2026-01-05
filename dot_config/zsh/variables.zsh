@@ -4,10 +4,8 @@ export FZF_DEFAULT_COMMAND='fd --type f --hidden --ignore-file ~/.config/fzf/ign
 export FZF_CTRL_T_COMMAND='fd --type f --hidden --ignore-file ~/.config/fzf/ignore'
 
 ## nvim configurations
-export VISUAL=nvim;
-export EDITOR=nvim;
+export VISUAL=nvim
+export EDITOR=nvim
+
 # zsh configuration
 export HISTFILE="$XDG_CONFIG_HOME/zsh/.zsh_history"
-export ZDOTDIR="${XDG_CONFIG_HOME}/zsh"
-export ZSH="$XDG_CONFIG_HOME/zsh/oh-my-zsh"
-export ZSHCUSTOM="$XDG_CONFIG_HOME/zsh"

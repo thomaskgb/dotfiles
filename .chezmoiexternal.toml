@@ -1,0 +1,17 @@
+# oh-my-zsh for built-in plugins (git, pip, macos, etc.)
+[".config/zsh/oh-my-zsh"]
+    type = "git-repo"
+    url = "https://github.com/ohmyzsh/ohmyzsh.git"
+    refreshPeriod = "168h"
+
+# zinit for external plugin management
+[".local/share/zinit/zinit.git"]
+    type = "git-repo"
+    url = "https://github.com/zdharma-continuum/zinit.git"
+    refreshPeriod = "168h"
+
+# tmux plugin manager
+[".config/tmux/plugins/tpm"]
+    type = "git-repo"
+    url = "https://github.com/tmux-plugins/tpm.git"
+    refreshPeriod = "168h"

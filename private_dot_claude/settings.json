@@ -1,0 +1,8 @@
+{
+  "customInstructions": "Always test changes after implementing them.",
+  "permissions": {
+    "allow": [],
+    "deny": [],
+    "ask": []
+  }
+}
