@@ -1,73 +1,66 @@
 #!/bin/bash
 # Install packages defined in .chezmoidata/packages.yaml
-# This script runs when the package list changes
+# Uses Homebrew on both macOS and Linux for consistent package versions
 
 set -e
 
-{{ if eq .chezmoi.os "darwin" -}}
-echo "Installing macOS packages via Homebrew..."
+# Function to install Homebrew
+install_homebrew() {
+    if ! command -v brew &>/dev/null; then
+        echo "Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# Check for Homebrew
-if ! command -v brew &>/dev/null; then
-    echo "Homebrew not found. Please install it first:"
-    echo '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
-    exit 1
-fi
+        # Add brew to PATH for this session
+        {{ if eq .chezmoi.os "linux" -}}
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+        {{ else if eq .chezmoi.os "darwin" -}}
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+        {{ end -}}
+    fi
+}
 
-# Install brews
-{{ range .packages.darwin.brews -}}
-brew install {{ . }} || true
-{{ end }}
-
-# Install casks
-{{ range .packages.darwin.casks -}}
-brew install --cask {{ . }} || true
-{{ end }}
-
-echo "macOS packages installed!"
-
-{{ else if eq .chezmoi.os "linux" -}}
-echo "Installing Linux packages via apt..."
+{{ if eq .chezmoi.os "linux" -}}
+echo "Installing Linux system dependencies via apt..."
 
 # Update package lists
 sudo apt update
 
-# Install apt packages
+# Install apt packages (system dependencies)
 {{ range .packages.linux.apt -}}
 sudo apt install -y {{ . }} || true
 {{ end }}
 
-# Install manual packages
-echo "Installing additional tools..."
+echo "System dependencies installed!"
+{{ end }}
 
-# GitHub CLI
-if ! command -v gh &>/dev/null; then
-    echo "Installing GitHub CLI..."
-    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-    sudo apt update
-    sudo apt install -y gh
-fi
+# Install Homebrew (works on both macOS and Linux)
+echo "Checking Homebrew installation..."
+install_homebrew
 
-# pyenv
-if ! command -v pyenv &>/dev/null; then
-    echo "Installing pyenv..."
-    curl https://pyenv.run | bash
-fi
+# Ensure brew is in PATH
+{{ if eq .chezmoi.os "linux" -}}
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+{{ else if eq .chezmoi.os "darwin" -}}
+eval "$(/opt/homebrew/bin/brew shellenv)"
+{{ end }}
 
-# lazygit
-if ! command -v lazygit &>/dev/null; then
-    echo "Installing lazygit..."
-    LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
-    curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
-    tar xf lazygit.tar.gz lazygit
-    sudo install lazygit /usr/local/bin
-    rm lazygit lazygit.tar.gz
-fi
+echo "Installing packages via Homebrew..."
 
-echo "Linux packages installed!"
+# Install common brews (both platforms)
+{{ range .packages.common.brews -}}
+brew install {{ . }} || true
+{{ end }}
 
-{{ end -}}
+{{ if eq .chezmoi.os "darwin" -}}
+echo "Installing macOS casks..."
+
+# Install casks (macOS only)
+{{ range .packages.darwin.casks -}}
+brew install --cask {{ . }} || true
+{{ end }}
+{{ end }}
+
+echo "Homebrew packages installed!"
 
 # Install tmux plugins
 if [ -d "$HOME/.config/tmux/plugins/tpm" ]; then

@@ -1,5 +1,6 @@
 packages:
-  darwin:
+  # Common packages installed via Homebrew on both macOS and Linux
+  common:
     brews:
       # Core tools
       - neovim
@@ -21,35 +22,29 @@ packages:
       - btop
       - bat
       - eza
+      - zsh
 
+  darwin:
     casks:
       - hammerspoon
       - karabiner-elements
 
   linux:
+    # System packages that require apt
     apt:
-      # Core tools
-      - neovim
-      - tmux
-      - git
-      - fzf
-      - ripgrep
-      - fd-find
+      - build-essential
       - curl
       - wget
-      - build-essential
-
-      # Python
-      - python3
-      - python3-pip
-
-      # Terminal utilities
-      - zsh
-      - ranger
-      - bat
-
-    # Tools installed separately (not in apt)
-    manual:
-      - gh          # GitHub CLI
-      - pyenv       # Python version manager
-      - lazygit     # Terminal UI for git
+      - zlib1g-dev
+      - libssl-dev
+      - libbz2-dev
+      - libreadline-dev
+      - libsqlite3-dev
+      - libffi-dev
+      - liblzma-dev
+      # pyenv build dependencies
+      - libncursesw5-dev
+      - xz-utils
+      - tk-dev
+      - libxml2-dev
+      - libxmlsec1-dev
