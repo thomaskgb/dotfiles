@@ -1,0 +1,46 @@
+# Initialize zinit
+ZINIT_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/zinit/zinit.git"
+source "${ZINIT_HOME}/zinit.zsh"
+
+# Load powerlevel10k theme (instant prompt first)
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+zinit ice depth=1
+zinit light romkatv/powerlevel10k
+[[ ! -f $XDG_CONFIG_HOME/zsh/p10k.zsh ]] || source $XDG_CONFIG_HOME/zsh/p10k.zsh
+
+# source variables first (sets ZSH, etc.)
+source "$XDG_CONFIG_HOME/zsh/variables.zsh"
+
+# oh-my-zsh for built-in plugins only
+ZSH_THEME=""  # theme handled by zinit
+{{- if eq .chezmoi.os "darwin" }}
+plugins=(git pip command-not-found copypath copyfile web-search macos)
+{{- else }}
+plugins=(git pip command-not-found copypath copyfile web-search)
+{{- end }}
+source "$ZSH/oh-my-zsh.sh"
+
+# External plugins via zinit
+zinit light zsh-users/zsh-autosuggestions
+zinit light zsh-users/zsh-syntax-highlighting
+zinit light marlonrichert/zsh-autocomplete
+
+# source aliases
+source "$XDG_CONFIG_HOME/zsh/aliases.zsh"
+
+# enable strongbox ssh socket
+SSH_AUTH_SOCK=~/.config/strongbox/agent.sock
+
+bindkey '^o' fzf-cd-widget
+
+## pyenv configuration
+export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+
+# fzf zsh configuration
+eval "$(fzf --zsh)"
+
+export PATH="$HOME/.local/bin:$PATH"
