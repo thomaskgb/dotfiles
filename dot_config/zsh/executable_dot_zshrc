@@ -1,70 +1,29 @@
-# p10k instant prompt
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-### Zinit plugin manager setup ###
-ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
-if [[ ! -d "$ZINIT_HOME" ]]; then
-    print -P "%F{yellow}Installing zinit...%f"
-    mkdir -p "$(dirname $ZINIT_HOME)"
-    git clone https://github.com/zdharma-continuum/zinit.git "$ZINIT_HOME"
-fi
-source "${ZINIT_HOME}/zinit.zsh"
+[[ ! -f $XDG_CONFIG_HOME/zsh/p10k.zsh ]] || source $XDG_CONFIG_HOME/zsh/p10k.zsh
 
-# Load completions
-autoload -Uz _zinit
-(( ${+_comps} )) && _comps[zinit]=_zinit
+# zsh config
+ZSH_THEME=powerlevel10k/powerlevel10k
+plugins=(git pip command-not-found copypath copyfile web-search macos zsh-syntax-highlighting zsh-autosuggestions zsh-autocomplete)
 
-### Zinit plugins (external) ###
-# Load powerlevel10k theme
-zinit ice depth=1
-zinit light romkatv/powerlevel10k
-
-# Load external plugins (except autocomplete - must load after oh-my-zsh)
-zinit light zsh-users/zsh-syntax-highlighting
-zinit light zsh-users/zsh-autosuggestions
-
-### oh-my-zsh configuration (built-in plugins only) ###
-export ZSH="$XDG_CONFIG_HOME/zsh/oh-my-zsh"
-export ZSH_CUSTOM="$XDG_CONFIG_HOME/zsh"
-ZSH_THEME=""  # Theme handled by zinit
-plugins=(git pip command-not-found copypath copyfile web-search macos)
-
-# Disable oh-my-zsh auto-update (managed by chezmoi)
-DISABLE_AUTO_UPDATE="true"
-
-# Source configuration files
+# source relevant files
 source "$XDG_CONFIG_HOME/zsh/variables.zsh"
 source "$ZSH/oh-my-zsh.sh"
 source "$XDG_CONFIG_HOME/zsh/aliases.zsh"
 
-# Load autocomplete AFTER oh-my-zsh to prevent keybinding conflicts
-zinit light marlonrichert/zsh-autocomplete
-
-# Load p10k theme config
-[[ ! -f $XDG_CONFIG_HOME/zsh/p10k.zsh ]] || source $XDG_CONFIG_HOME/zsh/p10k.zsh
-
 # enable strongbox ssh socket
 SSH_AUTH_SOCK=~/.config/strongbox/agent.sock
 
-# Custom keybindings
 bindkey '^o' fzf-cd-widget
 
-# pyenv shell integration (PATH setup in .zshenv)
-if command -v pyenv &>/dev/null; then
-    eval "$(pyenv init -)"
-    eval "$(pyenv virtualenv-init -)"
-fi
+## pyenv configuration
+export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
 
-# fzf integration
-if command -v fzf &>/dev/null; then
-    eval "$(fzf --zsh)"
-fi
+#fzf install zsh configuration
+eval "$(fzf --zsh)"
 
-# Auto-start tmux and attach to main session
-# Only for interactive shells with a real terminal, not already inside tmux
-if command -v tmux &>/dev/null && [ -z "$TMUX" ] && [[ $- == *i* ]] && [ -t 0 ]; then
-    tmux attach -t main 2>/dev/null || tmux new -s main
-fi
-
+export PATH="$HOME/.local/bin:$PATH"

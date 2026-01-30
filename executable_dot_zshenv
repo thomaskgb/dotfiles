@@ -1,0 +1,11 @@
+export XDG_CONFIG_HOME="$HOME/.config"
+
+if [[ -f "${XDG_CONFIG_HOME}/zsh/.zprofile" ]]; then
+    source "${XDG_CONFIG_HOME}/zsh/.zprofile"
+fi
+
+if [[ -f "${XDG_CONFIG_HOME}/zsh/.zshrc" ]]; then
+    source "${XDG_CONFIG_HOME}/zsh/.zshrc"
+fi
+
+
