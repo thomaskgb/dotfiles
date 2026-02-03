@@ -1,0 +1,181 @@
+# Reference: https://github.com/i3/i3/blob/next/etc/config
+
+# Enable normalizations for better automatic tiling behavior  
+enable-normalization-flatten-containers = false
+enable-normalization-opposite-orientation-for-nested-containers = true
+
+# Default layout for new windows
+default-root-container-layout = 'tiles'  
+default-root-container-orientation = 'horizontal'
+
+# Gaps between windows and monitor edges
+gaps.inner.horizontal = 10
+gaps.inner.vertical = 10
+gaps.outer.left = 10
+gaps.outer.bottom = 10
+gaps.outer.top = 10
+gaps.outer.right = 10
+
+# Mouse follows focus when focused monitor changes
+on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+
+# Ensure tiles layout on startup
+after-startup-command = [
+    'layout tiles',
+    'exec-and-forget borders active_color=0xfff9e2af inactive_color=0xff6c7086 width=6.0'
+]
+
+[mode.main.binding]
+    # See: https://nikitabobko.github.io/AeroSpace/goodies#open-a-new-window-with-applescript
+    alt-enter = '''exec-and-forget osascript -e '
+    tell application "Terminal"
+        do script
+        activate
+    end tell'
+    '''
+
+    # i3 wraps focus by default
+    alt-h =         'focus --boundaries-action wrap-around-the-workspace left'
+    alt-j =         'focus --boundaries-action wrap-around-the-workspace down'
+    alt-k =         'focus --boundaries-action wrap-around-the-workspace up'
+    alt-l =         'focus --boundaries-action wrap-around-the-workspace right'
+    alt-semicolon = 'focus --boundaries-action wrap-around-the-workspace right'
+    
+    # Arrow keys for window navigation
+    alt-left =  'focus --boundaries-action wrap-around-the-workspace left'
+    alt-down =  'focus --boundaries-action wrap-around-the-workspace down'
+    alt-up =    'focus --boundaries-action wrap-around-the-workspace up'
+    alt-right = 'focus --boundaries-action wrap-around-the-workspace right'
+
+    alt-shift-j = 'move left'
+    alt-shift-k = 'move down'
+    alt-shift-l = 'move up'
+    alt-shift-h = 'move right'
+    alt-shift-semicolon = 'move right'
+
+    alt-f = 'fullscreen'
+    alt-shift-enter = 'fullscreen'
+
+    alt-s = 'layout v_accordion' # 'layout stacking' in i3
+    alt-w = 'layout h_accordion' # 'layout tabbed' in i3
+    alt-t = 'layout tiles' # Enable automatic alternating splits
+    
+    # Manual splitting like i3
+    alt-v = 'split vertical'
+    alt-b = 'split horizontal'
+
+    alt-shift-space = 'layout floating tiling' # 'floating toggle' in i3
+
+    # Not supported, because this command is redundant in AeroSpace mental model.
+    # See: https://nikitabobko.github.io/AeroSpace/guide#floating-windows
+    #alt-space = 'focus toggle_tiling_floating'
+
+    # `focus parent`/`focus child` are not yet supported, and it's not clear whether they
+    # should be supported at all https://github.com/nikitabobko/AeroSpace/issues/5
+    # alt-a = 'focus parent'
+
+    alt-1 = 'workspace 1'
+    alt-2 = 'workspace 2'
+    alt-3 = 'workspace 3'
+    alt-4 = 'workspace 4'
+    
+    # Navigate between workspaces
+    alt-ctrl-h = 'workspace --wrap-around prev'
+    alt-ctrl-l = 'workspace --wrap-around next'
+
+    alt-shift-1 = ['move-node-to-workspace 1', 'workspace 1']
+    alt-shift-2 = ['move-node-to-workspace 2', 'workspace 2']
+    alt-shift-3 = ['move-node-to-workspace 3', 'workspace 3']
+    alt-shift-4 = ['move-node-to-workspace 4', 'workspace 4']
+
+    alt-shift-c = 'reload-config'
+    alt-shift-r = 'reload-config'
+
+    # Move window between monitors
+    alt-shift-left = 'move-node-to-monitor left'
+    alt-shift-right = 'move-node-to-monitor right'
+    alt-shift-up = 'move-node-to-monitor up'
+    alt-shift-down = 'move-node-to-monitor down'
+
+    alt-r = 'mode resize'
+
+[mode.resize.binding]
+    h = 'resize width -50'
+    j = 'resize height +50'
+    k = 'resize height -50'
+    l = 'resize width +50'
+    enter = 'mode main'
+    esc = 'mode main'
+
+
+[[on-window-detected]]
+    if.app-id = 'com.brave.Browser'
+    run = "move-node-to-workspace 1"  
+
+[[on-window-detected]]
+    if.app-id = 'com.googlecode.iterm2'
+    run = "move-node-to-workspace 2"  
+
+# Obsidian → workspace 3
+[[on-window-detected]]
+    if.app-id = "md.obsidian"
+    run = "move-node-to-workspace 3"
+
+# Notion → workspace 3
+[[on-window-detected]]
+    if.app-id = "notion.id"
+    run = "move-node-to-workspace 3"
+
+# Mail + WhatsApp → workspace 4
+[[on-window-detected]]
+    if.app-id = 'com.apple.mail'
+    run = 'move-node-to-workspace 4'
+
+[[on-window-detected]]
+    if.app-id = 'desktop.WhatsApp'
+    run = 'move-node-to-workspace 4'
+
+# Floating windows
+[[on-window-detected]]
+    if.app-id = 'com.spotify.client'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.todoist.mac.Todoist'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.apple.iCal'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.markmcguill.strongbox.pro'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'ch.protonvpn.mac'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.anker.pcankerdockmanager'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'org.freedownloadmanager.fdm6'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'eu.exelban.Stats'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.apple.ActivityMonitor'
+    run = 'layout floating'
+
+[[on-window-detected]]
+    if.app-id = 'com.apple.finder'
+    run = 'layout floating'
+
+# Default: move unmatched windows to workspace 4
+[[on-window-detected]]
+    run = 'move-node-to-workspace 4'

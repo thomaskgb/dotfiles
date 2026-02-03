@@ -66,6 +66,10 @@ hs.hotkey.bind(HYPER, "c", function()
 	appLauncher.toggleApp("Calendar")
 end)
 
+hs.hotkey.bind(HYPER, "n", function()
+	appLauncher.toggleApp("Notion")
+end)
+
 local HYPER = { "cmd", "alt", "ctrl", "shift" }
 local AERO = "/opt/homebrew/bin/aerospace" -- adjust if needed
 
