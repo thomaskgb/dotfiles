@@ -54,6 +54,10 @@ brew install {{ . }} || true
 {{ if eq .chezmoi.os "darwin" -}}
 echo "Installing macOS casks..."
 
+# Tap required repositories
+brew tap homebrew/cask-fonts || true
+brew tap nikitabobko/tap || true
+
 # Install casks (macOS only)
 {{ range .packages.darwin.casks -}}
 brew install --cask {{ . }} || true

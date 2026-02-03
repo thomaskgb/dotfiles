@@ -28,6 +28,8 @@ packages:
     casks:
       - hammerspoon
       - karabiner-elements
+      - nikitabobko/tap/aerospace
+      - font-meslo-lg-nerd-font
 
   linux:
     # System packages that require apt
