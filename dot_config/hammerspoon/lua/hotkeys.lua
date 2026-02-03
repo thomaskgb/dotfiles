@@ -1,4 +1,3 @@
-local screenResolution = require("lua.screen_resolution")
 local appLauncher = require("lua.app_launcher")
 
 -- create a hyper key for hotkeys
@@ -69,9 +68,6 @@ end)
 hs.hotkey.bind(HYPER, "n", function()
 	appLauncher.toggleApp("Notion")
 end)
-
-local HYPER = { "cmd", "alt", "ctrl", "shift" }
-local AERO = "/opt/homebrew/bin/aerospace" -- adjust if needed
 
 hs.hotkey.bind(HYPER, "r", function()
 	-- Reload both AeroSpace and Hammerspoon configs

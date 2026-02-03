@@ -77,21 +77,6 @@ end
 -- Track windows we've already moved to prevent repeated moves
 local movedWindows = {}
 
--- Get window's current workspace via aerospace
-local function getWindowWorkspace(windowId)
-	local output = hs.execute(AERO .. " list-windows --all")
-	if not output then return nil end
-
-	for line in output:gmatch("[^\r\n]+") do
-		if line:match("^%s*" .. tostring(windowId)) then
-			-- Parse workspace from aerospace output
-			local ws = line:match("|%s*(%d+)%s*|") or line:match("(%d+)%s*$")
-			return ws
-		end
-	end
-	return nil
-end
-
 -- Move window to workspace (only if not already there)
 local function moveWindowToWorkspace(app, win, targetWorkspace)
 	if not app or not win then return end
