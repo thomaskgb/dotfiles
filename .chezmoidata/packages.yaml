@@ -25,6 +25,8 @@ packages:
       - zsh
 
   darwin:
+    brews:
+      - FelixKratz/formulae/borders
     casks:
       - hammerspoon
       - karabiner-elements
