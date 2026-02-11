@@ -90,6 +90,9 @@ after-startup-command = [
     # Navigate between workspaces
     alt-ctrl-h = 'workspace --wrap-around prev'
     alt-ctrl-l = 'workspace --wrap-around next'
+    alt-ctrl-shift-cmd-left = 'workspace --wrap-around prev'
+    alt-ctrl-shift-cmd-right = 'workspace --wrap-around next'
+    alt-ctrl-shift-cmd-space = 'workspace t'
 
     alt-shift-1 = ['move-node-to-workspace 1', 'workspace 1']
     alt-shift-2 = ['move-node-to-workspace 2', 'workspace 2']
@@ -127,7 +130,7 @@ after-startup-command = [
 
 [[on-window-detected]]
     if.app-id = 'com.googlecode.iterm2'
-    run = "move-node-to-workspace 2"  
+    run = "move-node-to-workspace t"
 
 # Obsidian → workspace 3
 [[on-window-detected]]
@@ -139,14 +142,22 @@ after-startup-command = [
     if.app-id = "notion.id"
     run = "move-node-to-workspace 3"
 
-# Mail + WhatsApp → workspace 4
+# Communication apps → workspace 2
 [[on-window-detected]]
     if.app-id = 'com.apple.mail'
-    run = 'move-node-to-workspace 4'
+    run = 'move-node-to-workspace 2'
 
 [[on-window-detected]]
     if.app-id = 'desktop.WhatsApp'
-    run = 'move-node-to-workspace 4'
+    run = 'move-node-to-workspace 2'
+
+[[on-window-detected]]
+    if.app-id = 'com.tinyspeck.slackmacgap'
+    run = 'move-node-to-workspace 2'
+
+[[on-window-detected]]
+    if.app-id = 'com.microsoft.teams2'
+    run = 'move-node-to-workspace 2'
 
 # Floating windows
 [[on-window-detected]]
@@ -201,6 +212,7 @@ after-startup-command = [
     3 = 'main'
     4 = 'main'
     5 = 'main'
+    t = 'main'
     6 = 'secondary'
     7 = 'secondary'
     8 = 'secondary'
