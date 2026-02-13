@@ -15,10 +15,14 @@ setw -g automatic-rename on
 set -g @continuum-restore 'on'
 set-option -g allow-passthrough on
 
-# rebind the prefix
+{{ if eq .chezmoi.os "darwin" -}}
+# rebind the prefix to C-SPACE on macOS
 unbind C-b
-set -g prefix C-SPACE
-bind-key C-a send-prefix
+set -g prefix C-Space
+bind-key C-Space send-prefix
+{{ else -}}
+# keep default C-b prefix on Linux
+{{ end -}}
 
 # yellow border around active window
 set -g @catppuccin_pane_border_style "fg=#6c7086"
