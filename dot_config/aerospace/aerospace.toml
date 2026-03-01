@@ -129,7 +129,7 @@ after-startup-command = [
     run = "move-node-to-workspace 1"  
 
 [[on-window-detected]]
-    if.app-id = 'com.googlecode.iterm2'
+    if.app-id = 'net.kovidgoyal.kitty'
     run = "move-node-to-workspace t"
 
 # Obsidian → workspace 3

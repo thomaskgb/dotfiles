@@ -44,3 +44,8 @@ eval "$(pyenv virtualenv-init -)"
 eval "$(fzf --zsh)"
 
 export PATH="$HOME/.local/bin:$PATH"
+
+# Auto-attach to tmux only over SSH, not in local kitty
+if [[ -n "$SSH_CONNECTION" ]] && [[ -z "$TMUX" ]]; then
+  tmux has-session -t main 2>/dev/null && tmux attach -t main || tmux new-session -s main
+fi

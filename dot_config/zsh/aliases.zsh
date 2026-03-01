@@ -29,6 +29,9 @@ alias vim="nvim"
 alias vi="nvim"
 
 
+## kitty shortcuts
+alias icat='kitty +kitten icat --fit=height'
+
 # tmux aliasses
 alias tns="tmux new-session -s test"
 alias tm="tmux has-session -t main 2>/dev/null && tmux attach -t main || tmux new-session -s main"
