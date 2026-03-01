@@ -28,6 +28,7 @@ packages:
     brews:
       - FelixKratz/formulae/borders
     casks:
+      - kitty
       - hammerspoon
       - karabiner-elements
       - nikitabobko/tap/aerospace
