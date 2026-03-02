@@ -7,7 +7,7 @@ local AERO = "/opt/homebrew/bin/aerospace"
 -- "floating" apps follow the user - we move them to current workspace
 local APP_CONFIG = {
 	["Brave Browser"] = { type = "tiled", workspace = "1" },
-	["iTerm2"] = { type = "tiled", workspace = "2" },
+	["kitty"] = { type = "tiled", workspace = "2" },
 	["Obsidian"] = { type = "tiled", workspace = "3" },
 	["Notion"] = { type = "tiled", workspace = "3" },
 	["Mail"] = { type = "tiled", workspace = "4" },

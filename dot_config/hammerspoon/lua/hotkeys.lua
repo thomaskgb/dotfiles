@@ -43,7 +43,7 @@ end)
 
 -- APPLICATION LAUNCHER --
 hs.hotkey.bind(HYPER, "space", function()
-	appLauncher.toggleApp("iTerm2")
+	appLauncher.toggleApp("kitty")
 end)
 
 hs.hotkey.bind(HYPER, "t", function()
