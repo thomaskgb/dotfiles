@@ -1,8 +1,13 @@
 {
-  "customInstructions": "Always test changes after implementing them.",
   "permissions": {
     "allow": [],
     "deny": [],
     "ask": []
+  },
+  "customInstructions": "Always test changes after implementing them.",
+  "statusLine": {
+    "type": "command",
+    "command": "npx -y ccstatusline@latest",
+    "padding": 0
   }
 }
