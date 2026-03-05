@@ -86,6 +86,12 @@ return {
         hl.GitSignsAdd    = { fg = "#3AE070" }
         hl.GitSignsChange = { fg = "#D4A017" }
         hl.GitSignsDelete = { fg = "#E84040" }
+
+        -- Snacks dashboard (LazyVim logo)
+        hl.SnacksDashboardHeader = { fg = "#E8B830", bold = true }
+        hl.SnacksDashboardTitle  = { fg = "#E8B830" }
+        hl.SnacksDashboardIcon   = { fg = "#E8B830" }
+        hl.SnacksDashboardKey    = { fg = "#D4A017" }
       end,
     },
   },
