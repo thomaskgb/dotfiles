@@ -5,78 +5,87 @@
       {
         "id": "1",
         "type": "model",
-        "color": "cyan"
+        "color": "hex:E8B830"
       },
       {
         "id": "2",
-        "type": "separator"
+        "type": "separator",
+        "color": "hex:3A3D42"
       },
       {
         "id": "3",
         "type": "context-length",
-        "color": "brightBlack"
+        "color": "hex:8A8D93"
       },
       {
         "id": "4",
-        "type": "separator"
+        "type": "separator",
+        "color": "hex:3A3D42"
       },
       {
         "id": "5",
         "type": "git-branch",
-        "color": "magenta"
+        "color": "hex:B8D8E8"
       },
       {
         "id": "6",
-        "type": "separator"
+        "type": "separator",
+        "color": "hex:3A3D42"
       },
       {
         "id": "7",
         "type": "git-changes",
-        "color": "yellow"
+        "color": "hex:D4A017"
       }
     ],
     [
       {
         "id": "b0eefa69-9b71-4971-8cd8-4aac953a757d",
-        "type": "session-clock"
+        "type": "session-clock",
+        "color": "hex:A8ADB3"
       },
       {
         "id": "c450830d-2ae6-41e1-a282-f507222ea994",
-        "type": "separator"
+        "type": "separator",
+        "color": "hex:3A3D42"
       },
       {
         "id": "6fd71659-ee0a-4338-8ff4-bdfeb3361e59",
-        "type": "session-usage"
+        "type": "session-usage",
+        "color": "hex:4A9EF5"
       },
       {
         "id": "060d9b44-a1f0-40ed-a94a-3f53f5365456",
-        "type": "separator"
+        "type": "separator",
+        "color": "hex:3A3D42"
       },
       {
         "id": "63b729bb-8f97-490e-a768-7910b511ebd5",
-        "type": "session-cost"
+        "type": "session-cost",
+        "color": "hex:3AE070"
       },
       {
         "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-        "type": "separator"
+        "type": "separator",
+        "color": "hex:3A3D42"
       },
       {
         "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
         "type": "session-id",
-        "color": "brightBlack"
+        "color": "hex:8A8D93"
       }
     ],
     []
   ],
   "flexMode": "full-minus-40",
   "compactThreshold": 60,
-  "colorLevel": 2,
+  "colorLevel": 3,
   "inheritSeparatorColors": false,
   "globalBold": false,
   "powerline": {
     "enabled": false,
     "separators": [
-      ""
+      ""
     ],
     "separatorInvertBackground": [
       false

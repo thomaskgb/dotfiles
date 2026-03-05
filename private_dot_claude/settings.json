@@ -4,10 +4,10 @@
     "deny": [],
     "ask": []
   },
-  "customInstructions": "Always test changes after implementing them.",
   "statusLine": {
     "type": "command",
-    "command": "npx -y ccstatusline@latest",
+    "command": "env FORCE_COLOR=3 npx -y ccstatusline@latest",
     "padding": 0
-  }
+  },
+  "customInstructions": "Always test changes after implementing them."
 }

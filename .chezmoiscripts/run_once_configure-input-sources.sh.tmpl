@@ -1,0 +1,14 @@
+#!/bin/bash
+# Disable macOS Ctrl+Space shortcut for input source switching
+# This frees Ctrl+Space for use as tmux prefix
+
+{{ if eq .chezmoi.os "darwin" -}}
+echo "Disabling macOS Ctrl+Space input source shortcut..."
+
+# Key 60 = "Select the previous input source" (Ctrl+Space)
+# Key 61 = "Select next source in input menu" (Ctrl+Option+Space)
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 60 '{"enabled" = 0; "value" = { "parameters" = (32, 49, 262144); "type" = "standard"; }; }'
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 61 '{"enabled" = 0; "value" = { "parameters" = (32, 49, 786432); "type" = "standard"; }; }'
+
+echo "Input source shortcuts disabled. A logout/login may be required for changes to take effect."
+{{ end -}}

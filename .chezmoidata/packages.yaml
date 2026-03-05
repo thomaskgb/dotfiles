@@ -23,6 +23,7 @@ packages:
       - bat
       - eza
       - zsh
+      - zoxide
 
   darwin:
     brews:

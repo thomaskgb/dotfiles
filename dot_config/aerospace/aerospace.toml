@@ -22,7 +22,7 @@ on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 # Ensure tiles layout on startup
 after-startup-command = [
     'layout tiles',
-    'exec-and-forget borders active_color=0xfff9e2af inactive_color=0xff6c7086 width=6.0'
+    'exec-and-forget borders active_color=0xffE8B830 inactive_color=0xff3A3D42 width=6.0'
 ]
 
 [mode.main.binding]

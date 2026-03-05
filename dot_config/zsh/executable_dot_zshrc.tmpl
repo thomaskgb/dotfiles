@@ -27,6 +27,11 @@ zinit light zsh-users/zsh-autosuggestions
 zinit light zsh-users/zsh-syntax-highlighting
 zinit light marlonrichert/zsh-autocomplete
 
+# directory stack - cd -<TAB> shows recent directories
+setopt AUTO_PUSHD
+setopt PUSHD_IGNORE_DUPS
+setopt PUSHD_SILENT
+
 # source aliases
 source "$XDG_CONFIG_HOME/zsh/aliases.zsh"
 
@@ -42,6 +47,9 @@ eval "$(pyenv virtualenv-init -)"
 
 # fzf zsh configuration
 eval "$(fzf --zsh)"
+
+# zoxide - smart directory jumping (z foo, zi for interactive)
+eval "$(zoxide init zsh)"
 
 export PATH="$HOME/.local/bin:$PATH"
 

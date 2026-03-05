@@ -52,10 +52,16 @@ brew install {{ . }} || true
 {{ end }}
 
 {{ if eq .chezmoi.os "darwin" -}}
-echo "Installing macOS casks..."
+echo "Installing macOS brews and casks..."
 
 # Tap required repositories
 brew tap nikitabobko/tap || true
+brew tap FelixKratz/formulae || true
+
+# Install macOS-specific brews
+{{ range .packages.darwin.brews -}}
+brew install {{ . }} || true
+{{ end }}
 
 # Install casks (macOS only)
 {{ range .packages.darwin.casks -}}

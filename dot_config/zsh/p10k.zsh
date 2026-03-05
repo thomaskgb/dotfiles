@@ -172,7 +172,7 @@
   fi
 
   # Default background color - Wasp theme dark background
-  typeset -g POWERLEVEL9K_BACKGROUND=235
+  typeset -g POWERLEVEL9K_BACKGROUND=234  # Surface Dark (~#1C1D1F)
 
   # Separator between same-color segments on the left.
   typeset -g POWERLEVEL9K_LEFT_SUBSEGMENT_SEPARATOR='%246F\u2571'
@@ -504,7 +504,7 @@
   typeset -g POWERLEVEL9K_VCS_{STAGED,UNSTAGED,UNTRACKED,CONFLICTED,COMMITS_AHEAD,COMMITS_BEHIND}_MAX_NUM=-1
 
   # Icon color.
-  typeset -g POWERLEVEL9K_VCS_VISUAL_IDENTIFIER_COLOR=76
+  typeset -g POWERLEVEL9K_VCS_VISUAL_IDENTIFIER_COLOR=82
   typeset -g POWERLEVEL9K_VCS_LOADING_VISUAL_IDENTIFIER_COLOR=244
   # Custom icon.
   # typeset -g POWERLEVEL9K_VCS_VISUAL_IDENTIFIER_EXPANSION='⭐'
@@ -518,9 +518,9 @@
 
   # These settings are used for repositories other than Git or when gitstatusd fails and
   # Powerlevel10k has to fall back to using vcs_info.
-  typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND=108
-  typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND=108
-  typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND=220
+  typeset -g POWERLEVEL9K_VCS_CLEAN_FOREGROUND=82     # OLED Green
+  typeset -g POWERLEVEL9K_VCS_UNTRACKED_FOREGROUND=153  # Ice Blue
+  typeset -g POWERLEVEL9K_VCS_MODIFIED_FOREGROUND=214  # Amber Accent
 
   ##########################[ status: exit code of the last command ]###########################
   # Enable OK_PIPE, ERROR_PIPE and ERROR_SIGNAL status states to allow us to enable, disable and
@@ -530,13 +530,13 @@
   # Status on success. No content, just an icon. No need to show it if prompt_char is enabled as
   # it will signify success by turning green.
   typeset -g POWERLEVEL9K_STATUS_OK=false
-  typeset -g POWERLEVEL9K_STATUS_OK_FOREGROUND=108
+  typeset -g POWERLEVEL9K_STATUS_OK_FOREGROUND=82     # OLED Green
   typeset -g POWERLEVEL9K_STATUS_OK_VISUAL_IDENTIFIER_EXPANSION='✔'
 
   # Status when some part of a pipe command fails but the overall exit status is zero. It may look
   # like this: 1|0.
   typeset -g POWERLEVEL9K_STATUS_OK_PIPE=true
-  typeset -g POWERLEVEL9K_STATUS_OK_PIPE_FOREGROUND=108
+  typeset -g POWERLEVEL9K_STATUS_OK_PIPE_FOREGROUND=82  # OLED Green
   typeset -g POWERLEVEL9K_STATUS_OK_PIPE_VISUAL_IDENTIFIER_EXPANSION='✔'
 
   # Status when it's just an error code (e.g., '1'). No need to show it if prompt_char is enabled as
@@ -576,7 +576,7 @@
   # Don't show the number of background jobs.
   typeset -g POWERLEVEL9K_BACKGROUND_JOBS_VERBOSE=false
   # Background jobs color.
-  typeset -g POWERLEVEL9K_BACKGROUND_JOBS_FOREGROUND=108
+  typeset -g POWERLEVEL9K_BACKGROUND_JOBS_FOREGROUND=75  # OLED Blue
   # Custom icon.
   # typeset -g POWERLEVEL9K_BACKGROUND_JOBS_VISUAL_IDENTIFIER_EXPANSION='⭐'
 
