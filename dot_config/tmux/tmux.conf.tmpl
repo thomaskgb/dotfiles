@@ -9,6 +9,11 @@ set -g @plugin 'tmux-plugin/tmux-continuum'
 set -g @plugin 'pschmitt/tmux-ssh-split'
 
 
+# Bell monitoring - highlights windows when Claude Code finishes
+set -g monitor-bell on
+set -g visual-bell off
+set -g bell-action other
+
 set -g default-terminal "screen-256color"
 set -g base-index 1
 setw -g pane-base-index 1

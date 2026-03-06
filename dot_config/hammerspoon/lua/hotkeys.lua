@@ -27,6 +27,11 @@ hs.hotkey.bind(HYPER, "5", function()
 	aero("workspace 5")
 end)
 
+-- Floating windows workspace
+hs.hotkey.bind(HYPER, "a", function()
+	aero("workspace a")
+end)
+
 -- Secondary monitor (6-9)
 hs.hotkey.bind(HYPER, "6", function()
 	aero("workspace 6")

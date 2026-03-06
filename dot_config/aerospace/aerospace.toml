@@ -22,7 +22,7 @@ on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 # Ensure tiles layout on startup
 after-startup-command = [
     'layout tiles',
-    'exec-and-forget borders active_color=0xffE8B830 inactive_color=0xff3A3D42 width=6.0'
+    'exec-and-forget borders active_color=0xffE8B830 inactive_color=0x00000000 width=6.0'
 ]
 
 [mode.main.binding]
@@ -159,46 +159,50 @@ after-startup-command = [
     if.app-id = 'com.microsoft.teams2'
     run = 'move-node-to-workspace 2'
 
-# Floating windows
+# Floating windows → workspace a
 [[on-window-detected]]
     if.app-id = 'com.spotify.client'
-    run = 'layout floating'
+    run = ['layout floating', 'move-node-to-workspace a']
 
 [[on-window-detected]]
     if.app-id = 'com.todoist.mac.Todoist'
-    run = 'layout floating'
+    run = ['layout floating', 'move-node-to-workspace a']
 
 [[on-window-detected]]
     if.app-id = 'com.apple.iCal'
-    run = 'layout floating'
+    run = ['layout floating', 'move-node-to-workspace a']
 
 [[on-window-detected]]
     if.app-id = 'com.markmcguill.strongbox.pro'
-    run = 'layout floating'
+    run = ['layout floating', 'move-node-to-workspace a']
 
 [[on-window-detected]]
     if.app-id = 'ch.protonvpn.mac'
-    run = 'layout floating'
+    run = ['layout floating', 'move-node-to-workspace a']
 
 [[on-window-detected]]
     if.app-id = 'com.anker.pcankerdockmanager'
-    run = 'layout floating'
+    run = ['layout floating', 'move-node-to-workspace a']
 
 [[on-window-detected]]
     if.app-id = 'org.freedownloadmanager.fdm6'
-    run = 'layout floating'
+    run = ['layout floating', 'move-node-to-workspace a']
 
 [[on-window-detected]]
     if.app-id = 'eu.exelban.Stats'
-    run = 'layout floating'
+    run = ['layout floating', 'move-node-to-workspace a']
 
 [[on-window-detected]]
     if.app-id = 'com.apple.ActivityMonitor'
-    run = 'layout floating'
+    run = ['layout floating', 'move-node-to-workspace a']
 
 [[on-window-detected]]
     if.app-id = 'com.apple.finder'
-    run = 'layout floating'
+    run = ['layout floating', 'move-node-to-workspace a']
+
+[[on-window-detected]]
+    if.app-id = 'com.1password.1password'
+    run = ['layout floating', 'move-node-to-workspace a']
 
 # Default: move unmatched windows to workspace 4
 [[on-window-detected]]
@@ -213,6 +217,7 @@ after-startup-command = [
     4 = 'main'
     5 = 'main'
     t = 'main'
+    a = 'main'
     6 = 'secondary'
     7 = 'secondary'
     8 = 'secondary'
