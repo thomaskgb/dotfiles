@@ -56,7 +56,9 @@ command -v fnm &>/dev/null && eval "$(fnm env --use-on-cd --shell zsh)"
 
 export PATH="$HOME/.local/bin:$PATH"
 
+{{ if eq .chezmoi.os "darwin" -}}
 # Auto-attach to tmux session on interactive login
 if [[ -z "$TMUX" ]]; then
   tmux has-session -t main 2>/dev/null && tmux attach -t main || tmux new-session -s main
 fi
+{{ end -}}
