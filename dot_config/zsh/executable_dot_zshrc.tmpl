@@ -51,6 +51,9 @@ eval "$(fzf --zsh)"
 # zoxide - smart directory jumping (z foo, zi for interactive)
 eval "$(zoxide init zsh)"
 
+# fnm - Node version manager (auto-switches based on .nvmrc)
+command -v fnm &>/dev/null && eval "$(fnm env --use-on-cd --shell zsh)"
+
 export PATH="$HOME/.local/bin:$PATH"
 
 # Auto-attach to tmux session on interactive login

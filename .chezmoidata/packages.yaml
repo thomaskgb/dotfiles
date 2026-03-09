@@ -15,6 +15,7 @@ packages:
       - pyenv
       - pyenv-virtualenv
       - node
+      - fnm
 
       # Terminal utilities
       - lazygit
