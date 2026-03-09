@@ -24,6 +24,7 @@ packages:
       - eza
       - zsh
       - zoxide
+      - multi-git-status
 
   darwin:
     brews:

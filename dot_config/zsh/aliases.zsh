@@ -11,7 +11,7 @@ alias code='code-insiders'
 ## git shortcuts
 alias gl="git pull"
 alias gp="git push"
-alias gs="cd $HOME/github/ && $HOME/github/config-station/scripts/git/mgitstatus.sh && cd -"
+alias gs="mgitstatus $HOME/github/"
 
 ## chezmo shortcuts
 alias c="chezmoi"

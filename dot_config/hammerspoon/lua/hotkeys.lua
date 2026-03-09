@@ -84,7 +84,7 @@ hs.hotkey.bind(HYPER, "m", function()
 end)
 
 hs.hotkey.bind(HYPER, "c", function()
-	appLauncher.toggleApp("Calendar")
+	appLauncher.toggleApp("Claude")
 end)
 
 hs.hotkey.bind(HYPER, "n", function()
@@ -92,9 +92,10 @@ hs.hotkey.bind(HYPER, "n", function()
 end)
 
 hs.hotkey.bind(HYPER, "r", function()
-	-- Reload both AeroSpace and Hammerspoon configs
+	-- Reload AeroSpace and Hammerspoon configs
 	hs.execute(AERO .. " reload-config")
-	hs.alert.show("Reloading configs...")
+	-- Reload tmux config
+	hs.execute("/opt/homebrew/bin/tmux source-file ~/.config/tmux/tmux.conf")
 	hs.reload()
 end)
 hs.alert.show("Config loaded")

@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(log show:*)"
+      "Bash(log show:*)",
+      "Bash(aerospace list-windows:*)",
+      "Bash(osascript:*)"
     ],
     "deny": [],
     "ask": []

@@ -148,7 +148,7 @@ after-startup-command = [
     run = 'move-node-to-workspace 2'
 
 [[on-window-detected]]
-    if.app-id = 'desktop.WhatsApp'
+    if.app-id = 'net.whatsapp.WhatsApp'
     run = 'move-node-to-workspace 2'
 
 [[on-window-detected]]

@@ -49,27 +49,27 @@ set -g @catppuccin_pane_border_status "top"
 set -g status-position bottom
 set -g status-justify centre
 set -g status-left-length 050
-set -g status-right-length 050
+set -g status-right-length 080
 set -g status-style "bg=#1C1D1F"
 set-option -g status-interval 1
 set-option -g status-left "#[fg=#E8B830,bg=#1C1D1F,bold] #S "
-set-option -g status-right "#[fg=#8A8D93]%Y-%m-%d #[fg=#E8E8EA]%H:%M:%S "
+set-option -g status-right "#{?SSH_CONNECTION,#[fg=#E8B830] 󰣀 #[fg=#8A8D93]#{=20:SSH_CONNECTION} ,}#[fg=#8A8D93]%Y-%m-%d #[fg=#E8E8EA]%H:%M:%S "
 
-# catppuccin window styling
+# catppuccin window styling – Shargeek colors, rounded separators
 set -g @catppuccin_window_status_style "rounded"
 set -g @catppuccin_window_number_color "#3A3D42"
 set -g @catppuccin_window_text_color "#2A2D31"
-set -g @catppuccin_window_text " #W | #{b:pane_current_path}"
+set -g @catppuccin_window_text " #W | #{b:pane_current_path} #{@claude_status}"
 set -g @catppuccin_window_current_number_color "#E8B830"
 set -g @catppuccin_window_current_text_color "#2A2D31"
-set -g @catppuccin_window_current_text " #W | #{b:pane_current_path}"
+set -g @catppuccin_window_current_text " #W | #{b:pane_current_path} #{@claude_status}"
 
 # reload config shortcut
 unbind r
 bind r source-file ~/.config/tmux/tmux.conf
 
 # SSH split configuration - preserve both SSH sessions and working directories
-set-option -g @ssh-split-keep-cwd "true"           # Preserve local working directory  
+set-option -g @ssh-split-keep-cwd "true"           # Preserve local working directory
 set-option -g @ssh-split-keep-remote-cwd "true"    # Preserve remote working directory
 set-option -g @ssh-split-strip-cmd "true"          # Clean SSH commands
 set-option -g @ssh-split-no-shell "false"          # Keep shell sessions
@@ -86,7 +86,7 @@ bind % if-shell '[ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]' \
     'run-shell "~/.tmux/plugins/tmux-ssh-split/scripts/tmux-ssh-split -h"' \
     'split-window -h -c "#{pane_current_path}"'
 
-# Additional bindings for SSH-aware splits  
+# Additional bindings for SSH-aware splits
 set-option -g @ssh-split-h-key "|"                 # Alternative horizontal split
 set-option -g @ssh-split-v-key "-"                 # Alternative vertical split
 
@@ -99,8 +99,16 @@ bind -r h resize-pane -L 5
 # fill pane to full screen
 bind -r ENTER resize-pane -Z
 
-bind S command-prompt -p "New session name:" "new-session -s '%%'":w
-bind W command-prompt -p "New window name:" "new-window -n '%%'":w
+bind S command-prompt -p "New session name:" "new-session -s '%%'"
+bind W command-prompt -p "New window name:" "new-window -n '%%'"
 
-# Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
+# Initialize TMUX plugin manager
 run '~/.config/tmux/plugins/tpm/tpm'
+
+# Override catppuccin status bar with Shargeek theme (must be after TPM)
+set -g status-style "bg=#1C1D1F"
+set -g status-justify centre
+set -g status-left-length 50
+set -g status-right-length 80
+set-option -g status-left "#[fg=#E8B830,bg=#1C1D1F,bold] #S "
+set-option -g status-right "#{?SSH_CONNECTION,#[fg=#E8B830] 󰣀 #[fg=#8A8D93]#{=20:SSH_CONNECTION} ,}#[fg=#8A8D93]%Y-%m-%d #[fg=#E8E8EA]%H:%M:%S "
