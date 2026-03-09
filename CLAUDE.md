@@ -83,15 +83,11 @@ This system strictly follows the XDG Base Directory Specification:
 
 ### macOS Window Management
 
-#### Yabai (Tiling Window Manager)
-- **Config location**: `~/.config/yabai/yabairc`
-- **Layout**: BSP (binary space partitioning)
-- **Dynamic padding**: Automatically adjusts padding based on:
-  - Wide displays (≥3440px): Adds substantial padding for single/dual windows
-  - Number of visible windows on current space
-- **Floating apps**: iTerm2, Stats, Activity Monitor, NordVPN configured to float
-- **Window sizing**: Custom signals for iTerm2 and Strongbox positioning
-- **Startup**: Creates up to 4 spaces automatically
+#### AeroSpace (Tiling Window Manager)
+- **Config location**: `~/.config/aerospace/aerospace.toml`
+- **Layout**: Tiles (default horizontal orientation)
+- **Workspace assignments**: Apps auto-move to designated workspaces via `on-window-detected` rules
+- **Workspaces**: 1-5 + t (terminal) + a (floating) on main monitor, 6-9 on secondary
 
 #### Hammerspoon (macOS Automation)
 - **Config location**: `~/.config/hammerspoon/`
@@ -209,7 +205,6 @@ After making changes:
 ## Common Gotchas
 
 1. **Tmux session startup issues**: If tmux auto-attach fails, check for stale sockets in `/tmp/`
-2. **Yabai requires SIP modifications**: Some features require disabling System Integrity Protection on macOS
-3. **Homebrew path differences**: Different paths for Apple Silicon vs Intel Macs (handled in `.zshenv`)
+2. **Homebrew path differences**: Different paths for Apple Silicon vs Intel Macs (handled in `.zshenv`)
 4. **Plugin load order**: zsh-autocomplete must load after oh-my-zsh
 5. **Hammerspoon config path**: Must be set via `defaults write` (not automatic)

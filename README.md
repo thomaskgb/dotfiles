@@ -25,7 +25,7 @@ chezmoi apply
 
 ### macOS-Specific
 - **Hammerspoon** - macOS automation and window management
-- **Yabai** - Tiling window manager with dynamic display detection
+- **AeroSpace** - Tiling window manager
 - **Karabiner** - Advanced keyboard customization
 
 ## Features
