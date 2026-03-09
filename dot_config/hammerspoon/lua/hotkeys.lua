@@ -80,7 +80,7 @@ hs.hotkey.bind(HYPER, "p", function()
 end)
 
 hs.hotkey.bind(HYPER, "m", function()
-	appLauncher.toggleApp("Mail")
+	appLauncher.toggleApp("Microsoft Outlook")
 end)
 
 hs.hotkey.bind(HYPER, "c", function()
