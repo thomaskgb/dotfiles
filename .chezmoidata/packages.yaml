@@ -36,6 +36,7 @@ packages:
       - karabiner-elements
       - nikitabobko/tap/aerospace
       - font-meslo-lg-nerd-font
+      - caffeine
 
   linux:
     # System packages that require apt
