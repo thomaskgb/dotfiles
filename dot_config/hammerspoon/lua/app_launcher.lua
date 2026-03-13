@@ -138,4 +138,16 @@ end
 
 M.APP_CONFIG = APP_CONFIG
 
+-- Watch for new Todoist windows (e.g. quick add) and pull them to the current workspace
+local todoistFilter = hs.window.filter.new("Todoist")
+todoistFilter:subscribe(hs.window.filter.windowCreated, function(win)
+	hs.timer.doAfter(0.1, function()
+		if win and win:isVisible() then
+			local targetWorkspace = getCurrentWorkspace()
+			win:focus()
+			hs.execute(AERO .. " move-node-to-workspace " .. targetWorkspace)
+		end
+	end)
+end)
+
 return M
