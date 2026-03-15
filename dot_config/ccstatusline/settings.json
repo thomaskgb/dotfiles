@@ -5,7 +5,8 @@
       {
         "id": "1",
         "type": "model",
-        "color": "hex:E8B830"
+        "color": "hex:E8B830",
+        "rawValue": true
       },
       {
         "id": "2",
@@ -13,9 +14,9 @@
         "color": "hex:3A3D42"
       },
       {
-        "id": "3",
-        "type": "context-length",
-        "color": "hex:8A8D93"
+        "id": "b3102058-0fb1-44f3-98eb-9a0352728b05",
+        "type": "session-name",
+        "rawValue": true
       },
       {
         "id": "4",
@@ -52,7 +53,8 @@
       {
         "id": "6fd71659-ee0a-4338-8ff4-bdfeb3361e59",
         "type": "session-usage",
-        "color": "hex:4A9EF5"
+        "color": "hex:4A9EF5",
+        "rawValue": true
       },
       {
         "id": "060d9b44-a1f0-40ed-a94a-3f53f5365456",
@@ -61,21 +63,22 @@
       },
       {
         "id": "63b729bb-8f97-490e-a768-7910b511ebd5",
-        "type": "session-cost",
+        "type": "context-bar",
         "color": "hex:3AE070"
       },
       {
         "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
         "type": "separator",
         "color": "hex:3A3D42"
-      },
-      {
-        "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
-        "type": "session-id",
-        "color": "hex:8A8D93"
       }
     ],
-    []
+    [
+      {
+        "id": "8e07ee5d-7386-43fb-bde6-1eccde54db76",
+        "type": "current-working-dir",
+        "rawValue": true
+      }
+    ]
   ],
   "flexMode": "full-minus-40",
   "compactThreshold": 60,
