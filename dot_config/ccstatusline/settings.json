@@ -64,7 +64,8 @@
       {
         "id": "63b729bb-8f97-490e-a768-7910b511ebd5",
         "type": "context-bar",
-        "color": "hex:3AE070"
+        "color": "hex:3AE070",
+        "rawValue": true
       },
       {
         "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
