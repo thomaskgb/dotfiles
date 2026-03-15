@@ -74,7 +74,8 @@ echo "Homebrew packages installed!"
 # Install tmux plugins
 if [ -d "$HOME/.config/tmux/plugins/tpm" ]; then
     echo "Installing tmux plugins..."
-    "$HOME/.config/tmux/plugins/tpm/bin/install_plugins"
+    TMUX_PLUGIN_MANAGER_PATH="$HOME/.config/tmux/plugins" \
+        "$HOME/.config/tmux/plugins/tpm/bin/install_plugins"
 fi
 
 echo "Package installation complete!"
