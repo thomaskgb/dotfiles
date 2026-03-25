@@ -58,7 +58,7 @@ after-startup-command = [
 
     alt-s = 'layout v_accordion' # 'layout stacking' in i3
     alt-w = 'layout h_accordion' # 'layout tabbed' in i3
-    alt-t = 'layout tiles' # Enable automatic alternating splits
+    alt-shift-t = 'layout tiles' # Enable automatic alternating splits
     
     # Manual splitting like i3
     alt-v = 'split vertical'
