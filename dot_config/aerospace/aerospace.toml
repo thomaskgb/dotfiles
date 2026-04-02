@@ -1,6 +1,8 @@
 # Reference: https://github.com/i3/i3/blob/next/etc/config
 
-# Enable normalizations for better automatic tiling behavior  
+start-at-login = true
+
+# Enable normalizations for better automatic tiling behavior
 enable-normalization-flatten-containers = false
 enable-normalization-opposite-orientation-for-nested-containers = true
 
