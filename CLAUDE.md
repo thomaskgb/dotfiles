@@ -206,5 +206,5 @@ After making changes:
 
 1. **Tmux session startup issues**: If tmux auto-attach fails, check for stale sockets in `/tmp/`
 2. **Homebrew path differences**: Different paths for Apple Silicon vs Intel Macs (handled in `.zshenv`)
-4. **Plugin load order**: zsh-autocomplete must load after oh-my-zsh
-5. **Hammerspoon config path**: Must be set via `defaults write` (not automatic)
+3. **Plugin load order**: zsh-autocomplete must load after oh-my-zsh
+4. **Hammerspoon config path**: Must be set via `defaults write` (not automatic)
