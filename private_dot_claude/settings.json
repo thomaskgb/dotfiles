@@ -1,8 +1,15 @@
 {
   "permissions": {
-    "allow": [],
-    "deny": [],
-    "ask": []
+    "defaultMode": "auto",
+    "deny": [
+      "Bash(sudo *)",
+      "Bash(rm -rf *)",
+      "Bash(git push * --force*)",
+      "Bash(curl * | bash*)",
+      "Bash(curl * | sh*)",
+      "Bash(wget * | bash*)",
+      "Bash(wget * | sh*)"
+    ]
   },
   "statusLine": {
     "type": "command",
