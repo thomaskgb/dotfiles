@@ -169,10 +169,6 @@ after-startup-command = [
     run = ['layout floating', 'move-node-to-workspace a']
 
 [[on-window-detected]]
-    if.app-id = 'com.todoist.mac.Todoist'
-    run = ['layout floating', 'move-node-to-workspace a']
-
-[[on-window-detected]]
     if.app-id = 'com.apple.iCal'
     run = ['layout floating', 'move-node-to-workspace a']
 

@@ -138,14 +138,28 @@ end
 
 M.APP_CONFIG = APP_CONFIG
 
--- Watch for new Todoist windows (e.g. quick add) and pull them to the current workspace
+-- Watch for new Todoist windows (e.g. quick add) and pull them to the current workspace.
+-- When Todoist creates a quick add window, macOS activates the app, which may cause
+-- AeroSpace to follow focus to workspace "a" (where the main window lives). We track
+-- the last non-"a" workspace via window focus events so we know where to pull the window.
+local lastUserWorkspace = "1"
+local focusedWatcher = hs.window.filter.default
+focusedWatcher:subscribe(hs.window.filter.windowFocused, function()
+	local ws = getCurrentWorkspace()
+	if ws and ws ~= "a" then
+		lastUserWorkspace = ws
+	end
+end)
+
 local todoistFilter = hs.window.filter.new("Todoist")
 todoistFilter:subscribe(hs.window.filter.windowCreated, function(win)
-	hs.timer.doAfter(0.1, function()
+	local target = lastUserWorkspace
+	hs.timer.doAfter(0.15, function()
 		if win and win:isVisible() then
-			local targetWorkspace = getCurrentWorkspace()
 			win:focus()
-			hs.execute(AERO .. " move-node-to-workspace " .. targetWorkspace)
+			hs.execute(AERO .. " move-node-to-workspace " .. target)
+			hs.execute(AERO .. " workspace " .. target)
+			win:raise()
 		end
 	end)
 end)
