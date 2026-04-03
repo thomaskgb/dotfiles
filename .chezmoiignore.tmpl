@@ -1,5 +1,10 @@
 README.md
 
+# Claude Code local permissions — machine-specific, never sync across machines
+.claude/settings.local.json
+.config/.claude/settings.local.json
+.config/hammerspoon/.claude/settings.local.json
+
 # oh-my-zsh cache and log directories
 .config/zsh/oh-my-zsh/cache/
 .config/zsh/oh-my-zsh/log/
@@ -14,6 +19,9 @@ README.md
 
 # tmux resurrect saved sessions
 .config/tmux/resurrect/
+
+# LazyVim state file — extras managed via lua/plugins/extras.lua instead
+.config/nvim/lazyvim.json
 
 {{- if ne .chezmoi.os "darwin" }}
 # macOS-specific configs - ignore on non-macOS systems
