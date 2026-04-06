@@ -1,6 +1,23 @@
 {
   "permissions": {
-    "defaultMode": "auto",
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git branch *)",
+      "Bash(git checkout *)",
+      "Bash(git commit *)",
+      "Bash(ls *)",
+      "Bash(ls)",
+      "Bash(* --version)",
+      "Bash(* --help)",
+      "Bash(npm run *)",
+      "Bash(npm test *)",
+      "Bash(chezmoi diff *)",
+      "Bash(chezmoi status *)",
+      "Bash(chezmoi apply --dry-run *)"
+    ],
     "deny": [
       "Bash(sudo *)",
       "Bash(rm -rf *)",
