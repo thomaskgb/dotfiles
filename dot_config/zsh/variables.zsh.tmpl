@@ -25,3 +25,19 @@ export SAVEHIST=10000
 export ZDOTDIR="${XDG_CONFIG_HOME}/zsh"
 export ZSH="$XDG_CONFIG_HOME/zsh/oh-my-zsh"
 export ZSHCUSTOM="$XDG_CONFIG_HOME/zsh"
+
+# Commands starting with a space are never saved.
+setopt HIST_IGNORE_SPACE
+
+# Don't save commands that look like they contain secrets.
+# Uses zsh's case-pattern matching (no EXTENDED_GLOB needed).
+zshaddhistory() {
+  emulate -L zsh
+  case "$1" in
+    *TOKEN=*|*SECRET=*|*API_KEY=*|*APIKEY=*|*ACCESS_KEY=*|*PRIVATE_KEY=*|\
+    *PASSWORD=*|*PASSWD=*|*client_secret*|\
+    *[Aa]uthorization:*|*x-api-key:*|*[Bb]earer\ *)
+      return 1 ;;
+  esac
+  return 0
+}
