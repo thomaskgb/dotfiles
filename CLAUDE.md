@@ -63,7 +63,6 @@ This system strictly follows the XDG Base Directory Specification:
 - **Plugin managers**:
   - zinit (external plugins: powerlevel10k, syntax-highlighting, autosuggestions, autocomplete)
   - oh-my-zsh (built-in plugins: git, pip, macos, etc.)
-- **Auto-start behavior**: Automatically attaches to tmux session "main" on interactive login
 
 ⚠️ **zsh-autocomplete conflicts**: zsh-autocomplete MUST be loaded AFTER oh-my-zsh to prevent arrow key keybinding conflicts. See `dot_config/zsh/executable_dot_zshrc:42-43`
 
@@ -204,7 +203,6 @@ After making changes:
 
 ## Common Gotchas
 
-1. **Tmux session startup issues**: If tmux auto-attach fails, check for stale sockets in `/tmp/`
-2. **Homebrew path differences**: Different paths for Apple Silicon vs Intel Macs (handled in `.zshenv`)
-3. **Plugin load order**: zsh-autocomplete must load after oh-my-zsh
-4. **Hammerspoon config path**: Must be set via `defaults write` (not automatic)
+1. **Homebrew path differences**: Different paths for Apple Silicon vs Intel Macs (handled in `.zshenv`)
+2. **Plugin load order**: zsh-autocomplete must load after oh-my-zsh
+3. **Hammerspoon config path**: Must be set via `defaults write` (not automatic)
