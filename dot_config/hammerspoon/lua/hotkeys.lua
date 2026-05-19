@@ -48,7 +48,7 @@ end)
 
 -- APPLICATION LAUNCHER --
 hs.hotkey.bind(HYPER, "space", function()
-	appLauncher.toggleApp("kitty")
+	appLauncher.toggleApp("Superset")
 end)
 
 hs.hotkey.bind(HYPER, "t", function()
