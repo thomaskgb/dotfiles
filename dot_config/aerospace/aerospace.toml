@@ -126,6 +126,10 @@ after-startup-command = [
     if.app-id = 'net.kovidgoyal.kitty'
     run = "move-node-to-workspace t"
 
+[[on-window-detected]]
+    if.app-id = 'com.superset.desktop'
+    run = "move-node-to-workspace t"
+
 # Obsidian → workspace 3
 [[on-window-detected]]
     if.app-id = "md.obsidian"
