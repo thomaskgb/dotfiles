@@ -21,17 +21,25 @@ local APP_CONFIG = {
 }
 
 -- Get the best available window for an app (handles apps like Strongbox
--- where mainWindow() returns nil when only the database manager is open)
+-- where mainWindow() returns nil and only a popup is open, e.g. the unlock
+-- password prompt, which reports as a non-standard panel).
 local function getWindow(app)
-	local win = app:mainWindow()
-	if not win then
-		for _, w in ipairs(app:allWindows()) do
-			if w:isVisible() or w:isStandard() then
-				return w
-			end
+	-- A popup (password prompt, file picker) usually holds focus, so prefer it,
+	-- then the main window.
+	local win = app:focusedWindow() or app:mainWindow()
+	if win then
+		return win
+	end
+
+	-- Fall back to any visible window, then any window at all. The last resort
+	-- covers dialogs/panels that report as non-standard and non-visible.
+	local windows = app:allWindows()
+	for _, w in ipairs(windows) do
+		if w:isVisible() then
+			return w
 		end
 	end
-	return win
+	return windows[1]
 end
 
 -- Get current focused workspace
@@ -51,7 +59,9 @@ local function showApp(app)
 		app:unhide()
 	end
 
-	app:activate()
+	-- activate(true) brings ALL windows forward (incl. popups/panels),
+	-- which AeroSpace's window-focus cannot do on its own.
+	app:activate(true)
 
 	hs.timer.doAfter(0.05, function()
 		local win = getWindow(app)
@@ -90,7 +100,7 @@ local function moveFloatingToWorkspace(app, win, targetWorkspace)
 		hs.execute(AERO .. " move-node-to-workspace " .. targetWorkspace)
 		hs.timer.doAfter(0.1, function()
 			hs.execute(AERO .. " workspace " .. targetWorkspace)
-			app:activate()
+			app:activate(true)
 			win:raise()
 			win:centerOnScreen()
 		end)
@@ -141,20 +151,29 @@ M.APP_CONFIG = APP_CONFIG
 
 -- Watch for new Todoist windows (e.g. quick add) and pull them to the current workspace.
 -- When Todoist creates a quick add window, macOS activates the app, which may cause
--- AeroSpace to follow focus to workspace "a" (where the main window lives). We track
--- the last non-"a" workspace via window focus events so we know where to pull the window.
-local lastUserWorkspace = "1"
-local focusedWatcher = hs.window.filter.default
-focusedWatcher:subscribe(hs.window.filter.windowFocused, function()
-	local ws = getCurrentWorkspace()
-	if ws and ws ~= "a" then
-		lastUserWorkspace = ws
+-- AeroSpace to follow focus to workspace "a" (where the main window lives). To know where
+-- to pull the window, we read the last non-"a" workspace, which AeroSpace records to a file
+-- on every workspace change via its exec-on-workspace-change hook (see aerospace.toml).
+-- Reading a file is cheap and, unlike a global hs.window.filter watcher, does not block
+-- Hammerspoon's main thread with a shell call on every window focus.
+local LAST_WS_FILE = "/tmp/aerospace_last_user_workspace"
+
+local function readLastUserWorkspace()
+	local file = io.open(LAST_WS_FILE, "r")
+	if not file then
+		return "1"
 	end
-end)
+	local ws = file:read("*l")
+	file:close()
+	if ws and ws ~= "" then
+		return ws
+	end
+	return "1"
+end
 
 local todoistFilter = hs.window.filter.new("Todoist")
 todoistFilter:subscribe(hs.window.filter.windowCreated, function(win)
-	local target = lastUserWorkspace
+	local target = readLastUserWorkspace()
 	hs.timer.doAfter(0.15, function()
 		if win and win:isVisible() then
 			win:focus()

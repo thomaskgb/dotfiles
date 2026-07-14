@@ -27,6 +27,14 @@ after-startup-command = [
     'exec-and-forget borders active_color=0xffE8B830 inactive_color=0x00000000 width=6.0'
 ]
 
+# Record the last "real" (non-floating) workspace on every workspace change, from
+# any source (AeroSpace alt-N bindings, Hammerspoon hyper-N, etc.). Hammerspoon reads
+# this file to know where to pull the Todoist quick-add popup, which avoids a costly
+# global window-focus watcher on the Hammerspoon side. See app_launcher.lua.
+exec-on-workspace-change = ['/bin/bash', '-c',
+    'if [ "$AEROSPACE_FOCUSED_WORKSPACE" != "a" ]; then echo "$AEROSPACE_FOCUSED_WORKSPACE" > /tmp/aerospace_last_user_workspace; fi'
+]
+
 [mode.main.binding]
     # i3 wraps focus by default
     alt-h =         'focus --boundaries-action wrap-around-the-workspace left'
