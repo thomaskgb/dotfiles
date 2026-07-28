@@ -1,0 +1,76 @@
+#!/bin/sh
+# Claude Code global settings.
+#
+# This is a chezmoi modify_ script rather than a plain tracked file because
+# Claude Code and its ecosystem rewrite ~/.claude/settings.json at runtime, so a
+# verbatim copy drifts constantly and every `chezmoi update` asks whether to
+# overwrite it. The keys below are shared across machines; the `hooks` block is
+# machine-local (the Superset agent monitor stamps its own hooks in when it is
+# installed) and is carried over from whatever is already on disk.
+set -e
+
+managed=$(
+	cat <<'JSON'
+{
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git branch *)",
+      "Bash(git checkout *)",
+      "Bash(git commit *)",
+      "Bash(ls *)",
+      "Bash(ls)",
+      "Bash(* --version)",
+      "Bash(* --help)",
+      "Bash(npm run *)",
+      "Bash(npm test *)",
+      "Bash(chezmoi diff *)",
+      "Bash(chezmoi status *)",
+      "Bash(chezmoi apply --dry-run *)"
+    ],
+    "deny": [
+      "Bash(sudo *)",
+      "Bash(rm -rf *)",
+      "Bash(git push * --force*)",
+      "Bash(curl * | bash*)",
+      "Bash(curl * | sh*)",
+      "Bash(wget * | bash*)",
+      "Bash(wget * | sh*)"
+    ],
+    "defaultMode": "acceptEdits"
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "env FORCE_COLOR=3 npx -y ccstatusline@latest",
+    "padding": 0
+  },
+  "customInstructions": "Always test changes after implementing them.",
+  "model": "opus[1m]"
+}
+JSON
+)
+
+# Empty stdin means the file does not exist yet on this machine.
+current=$(cat)
+
+# chezmoi applies ~/.claude before .chezmoiscripts, so on a fresh machine jq is
+# not installed yet. Degrade gracefully instead of failing the whole apply.
+if ! command -v jq >/dev/null 2>&1; then
+	if [ -n "$current" ]; then
+		printf '%s\n' "$current"
+	else
+		printf '%s\n' "$managed"
+	fi
+	exit 0
+fi
+
+[ -n "$current" ] || current='{}'
+
+printf '%s\n' "$current" | jq --argjson managed "$managed" \
+	'$managed + (if has("hooks") then {hooks: .hooks} else {} end)'

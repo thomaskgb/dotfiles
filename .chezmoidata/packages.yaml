@@ -10,6 +10,8 @@ packages:
       - fzf
       - ripgrep
       - fd
+      # Required by private_dot_claude/modify_settings.json
+      - jq
 
       # Development
       - pyenv
