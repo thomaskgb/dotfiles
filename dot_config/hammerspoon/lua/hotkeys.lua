@@ -4,47 +4,10 @@ local appLauncher = require("lua.app_launcher")
 HYPER = { "cmd", "alt", "ctrl", "shift" }
 
 -- WORKSPACES --
+-- hyper-1..9 and hyper-a are bound directly in aerospace.toml, so switching a
+-- workspace no longer spawns an aerospace subprocess per keypress and cannot break
+-- when the CLI and the running server disagree after an upgrade.
 local AERO = "/opt/homebrew/bin/aerospace" -- adjust to your which-output
-
-local function aero(cmd)
-	hs.execute(AERO .. " " .. cmd)
-end
-
--- Primary monitor (1-5)
-hs.hotkey.bind(HYPER, "1", function()
-	aero("workspace 1")
-end)
-hs.hotkey.bind(HYPER, "2", function()
-	aero("workspace 2")
-end)
-hs.hotkey.bind(HYPER, "3", function()
-	aero("workspace 3")
-end)
-hs.hotkey.bind(HYPER, "4", function()
-	aero("workspace 4")
-end)
-hs.hotkey.bind(HYPER, "5", function()
-	aero("workspace 5")
-end)
-
--- Floating windows workspace
-hs.hotkey.bind(HYPER, "a", function()
-	aero("workspace a")
-end)
-
--- Secondary monitor (6-9)
-hs.hotkey.bind(HYPER, "6", function()
-	aero("workspace 6")
-end)
-hs.hotkey.bind(HYPER, "7", function()
-	aero("workspace 7")
-end)
-hs.hotkey.bind(HYPER, "8", function()
-	aero("workspace 8")
-end)
-hs.hotkey.bind(HYPER, "9", function()
-	aero("workspace 9")
-end)
 
 -- APPLICATION LAUNCHER --
 hs.hotkey.bind(HYPER, "space", function()
