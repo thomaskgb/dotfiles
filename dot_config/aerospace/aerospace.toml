@@ -1,13 +1,23 @@
 # Reference: https://github.com/i3/i3/blob/next/etc/config
 
+config-version = 2
+
 start-at-login = true
+
+# Under config-version 1 this list was inferred from the right-hand side of the
+# keyboard bindings below; config-version 2 requires it explicitly. These are the
+# workspaces that stay alive with no windows in them. Workspace 'a' (floating) is
+# deliberately absent: it was never inferred either, because it is only reached
+# from Hammerspoon (hyper-a) and from the on-window-detected rules below, so it
+# exists on demand rather than permanently.
+persistent-workspaces = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 't']
 
 # Enable normalizations for better automatic tiling behavior
 enable-normalization-flatten-containers = false
 enable-normalization-opposite-orientation-for-nested-containers = true
 
 # Default layout for new windows
-default-root-container-layout = 'tiles'  
+default-root-container-layout = 'tiles'
 default-root-container-orientation = 'horizontal'
 
 # Gaps between windows and monitor edges
@@ -42,7 +52,7 @@ exec-on-workspace-change = ['/bin/bash', '-c',
     alt-k =         'focus --boundaries-action wrap-around-the-workspace up'
     alt-l =         'focus --boundaries-action wrap-around-the-workspace right'
     alt-semicolon = 'focus --boundaries-action wrap-around-the-workspace right'
-    
+
     # Arrow keys for window navigation
     alt-left =  'focus --boundaries-action wrap-around-the-workspace left'
     alt-down =  'focus --boundaries-action wrap-around-the-workspace down'
@@ -60,8 +70,8 @@ exec-on-workspace-change = ['/bin/bash', '-c',
 
     alt-s = 'layout v_accordion' # 'layout stacking' in i3
     alt-w = 'layout h_accordion' # 'layout tabbed' in i3
-    alt-shift-t = 'layout tiles' # Enable automatic alternating splits
-    
+    alt-t = 'layout tiles' # Enable automatic alternating splits
+
     # Manual splitting like i3
     alt-v = 'split vertical'
     alt-b = 'split horizontal'
@@ -106,6 +116,13 @@ exec-on-workspace-change = ['/bin/bash', '-c',
     alt-shift-8 = ['move-node-to-workspace 8', 'workspace 8']
     alt-shift-9 = ['move-node-to-workspace 9', 'workspace 9']
 
+    # Terminal (t) and floating (a) workspaces, same move-and-follow behaviour as
+    # the numbered ones above. Note this does not change the window's layout, so a
+    # tiled window sent to 'a' stays tiled; add 'layout floating' first if you want
+    # everything landing there to float like the apps assigned to it below.
+    alt-shift-t = ['move-node-to-workspace t', 'workspace t']
+    alt-shift-a = ['move-node-to-workspace a', 'workspace a']
+
     alt-shift-c = 'reload-config'
     alt-shift-r = 'reload-config'
 
@@ -128,7 +145,7 @@ exec-on-workspace-change = ['/bin/bash', '-c',
 
 [[on-window-detected]]
     if.app-id = 'com.brave.Browser'
-    run = "move-node-to-workspace 1"  
+    run = 'move-node-to-workspace 1'
 
 [[on-window-detected]]
     if.app-id = 'net.kovidgoyal.kitty'
@@ -215,8 +232,12 @@ exec-on-workspace-change = ['/bin/bash', '-c',
     if.app-id = 'com.1password.1password'
     run = ['layout floating', 'move-node-to-workspace a']
 
-# Default: move unmatched windows to workspace 4
+# Default: move unmatched windows to workspace 4.
+# `if = 'true'` matches every window. Since callbacks stop at the first match
+# (check-further-callbacks defaults to false) and this block is last, it only
+# fires for windows none of the blocks above claimed.
 [[on-window-detected]]
+    if = 'true'
     run = 'move-node-to-workspace 4'
 
 # Workspace to monitor assignment
