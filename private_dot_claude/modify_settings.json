@@ -5,8 +5,8 @@
 # Claude Code and its ecosystem rewrite ~/.claude/settings.json at runtime, so a
 # verbatim copy drifts constantly and every `chezmoi update` asks whether to
 # overwrite it. The keys below are shared across machines; the `hooks` block is
-# machine-local (the Superset agent monitor stamps its own hooks in when it is
-# installed) and is carried over from whatever is already on disk.
+# machine-local (whatever agent tooling is installed stamps its own hooks in) and
+# is carried over from whatever is already on disk.
 set -e
 
 managed=$(
