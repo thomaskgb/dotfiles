@@ -8,6 +8,7 @@ local APP_CONFIG = {
 	["Brave Browser"] = { workspace = "1" },
 	["kitty"] = { workspace = "2" },
 	["Superset"] = { workspace = "t" },
+	["Orca"] = { workspace = "t" },
 	["Obsidian"] = { workspace = "3" },
 	["Notion"] = { workspace = "3" },
 	["Mail"] = { workspace = "4" },

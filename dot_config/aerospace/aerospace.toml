@@ -171,6 +171,10 @@ exec-on-workspace-change = ['/bin/bash', '-c',
     if.app-id = 'com.superset.desktop'
     run = "move-node-to-workspace t"
 
+[[on-window-detected]]
+    if.app-id = 'com.stablyai.orca'
+    run = "move-node-to-workspace t"
+
 # Obsidian → workspace 3
 [[on-window-detected]]
     if.app-id = "md.obsidian"

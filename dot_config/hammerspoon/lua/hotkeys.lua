@@ -11,7 +11,7 @@ local AERO = "/opt/homebrew/bin/aerospace" -- adjust to your which-output
 
 -- APPLICATION LAUNCHER --
 hs.hotkey.bind(HYPER, "space", function()
-	appLauncher.toggleApp("Superset")
+	appLauncher.toggleApp("Orca")
 end)
 
 hs.hotkey.bind(HYPER, "t", function()
