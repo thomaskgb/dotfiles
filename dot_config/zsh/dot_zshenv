@@ -1,0 +1,8 @@
+# Loaded instead of ~/.zshenv whenever ZDOTDIR already points at this directory:
+# nested zsh shells (variables.zsh exports ZDOTDIR), and remote-terminal wrappers
+# such as Orca, which source "$ZDOTDIR/.zshenv" rather than "$HOME/.zshenv".
+# Without this file those shells skip ~/.zshenv entirely and come up with zsh's
+# default "%m%#" prompt instead of the powerlevel10k one.
+if [[ -f "$HOME/.zshenv" ]]; then
+    source "$HOME/.zshenv"
+fi

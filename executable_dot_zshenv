@@ -1,5 +1,10 @@
 export XDG_CONFIG_HOME="$HOME/.config"
 
+# The real config lives in $ZDOTDIR. Export it here so zsh can find .zprofile/.zshrc
+# by itself; variables.zsh also exports it, but that runs far too late for zsh's own
+# startup-file lookup.
+export ZDOTDIR="${XDG_CONFIG_HOME}/zsh"
+
 # Set up Homebrew PATH early so tools are available when .zshrc loads
 if [[ -x /opt/homebrew/bin/brew ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -11,8 +16,12 @@ if [[ -f "${XDG_CONFIG_HOME}/zsh/.zprofile" ]]; then
     source "${XDG_CONFIG_HOME}/zsh/.zprofile"
 fi
 
-if [[ -f "${XDG_CONFIG_HOME}/zsh/.zshrc" ]]; then
-    source "${XDG_CONFIG_HOME}/zsh/.zshrc"
+# Interactive shells get .zshrc from zsh itself via ZDOTDIR, at the right moment
+# (zle is up, keybindings and completion widgets bind correctly). Sourcing it here
+# as well would load the whole plugin stack a second time, and too early.
+# Non-interactive shells never read .zshrc, so they still need it explicitly.
+if [[ ! -o interactive && -f "${ZDOTDIR}/.zshrc" ]]; then
+    source "${ZDOTDIR}/.zshrc"
 fi
 
 
