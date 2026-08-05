@@ -55,3 +55,11 @@ eval "$(zoxide init zsh)"
 command -v fnm &>/dev/null && eval "$(fnm env --use-on-cd --shell zsh)"
 
 export PATH="$HOME/.local/bin:$PATH"
+
+# Clear stuck mouse-reporting modes on demand.
+# A TUI (vim, less, fzf, lazygit, ...) that crashes or exits uncleanly can
+# leave the terminal in mouse-tracking mode. Back at the bare shell prompt,
+# nothing consumes the events, so every click/scroll dumps escape sequences
+# (e.g. "<35;40;12M") onto the line. Run `fixmouse` to clear it.
+# DECRST: X10/normal(1000), btn-event(1002), any-event(1003), SGR(1006) mouse
+fixmouse() { print -n '\e[?1000l\e[?1002l\e[?1003l\e[?1006l'; }
