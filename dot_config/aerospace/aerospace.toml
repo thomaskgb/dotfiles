@@ -168,10 +168,6 @@ exec-on-workspace-change = ['/bin/bash', '-c',
     run = "move-node-to-workspace t"
 
 [[on-window-detected]]
-    if.app-id = 'com.superset.desktop'
-    run = "move-node-to-workspace t"
-
-[[on-window-detected]]
     if.app-id = 'com.stablyai.orca'
     run = "move-node-to-workspace t"
 
