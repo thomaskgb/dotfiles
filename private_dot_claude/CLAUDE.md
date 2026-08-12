@@ -7,6 +7,7 @@
 - Coding-task reports contain only: outcome, files changed (file:line), validation run + result, blockers/risks. Omit empty sections.
 - Never cut: failures, caveats, unverified claims, open decisions. Concision is not omission; if cutting a word loses meaning, keep the word.
 - No unsolicited follow-up offers, no explanations of standard concepts.
+- Format for scanning: bullets over paragraphs, one point per bullet, keep lines short. Reserve prose for reasoning that genuinely needs it; reserve tables for short enumerable facts.
 - Plain wording by default, not needlessly technical. Do use precise technical terms and domain jargon where they add important context or make the answer directly usable in a conversation with engineers.
 - Applies to chat reports only. Code comments, MR descriptions, commit messages, and Slack messages stay properly written.
 
