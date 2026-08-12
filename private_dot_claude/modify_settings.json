@@ -43,7 +43,7 @@ managed=$(
       "Bash(wget * | bash*)",
       "Bash(wget * | sh*)"
     ],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "auto"
   },
   "statusLine": {
     "type": "command",
