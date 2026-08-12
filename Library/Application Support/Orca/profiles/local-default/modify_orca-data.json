@@ -1,0 +1,38 @@
+#!/bin/sh
+# Orca desktop app settings (subset).
+#
+# Orca keeps everything — settings plus machine state (repos, worktrees,
+# sessions, automation runs) — in this single orca-data.json and rewrites it
+# constantly while running. Tracking the file verbatim would clobber live
+# state, so this modify_ script deep-merges only the keys below into whatever
+# is on disk and passes everything else through untouched. Add keys to the
+# JSON blob to pin more settings.
+#
+# Orca loads the file at startup and saves over it while running, so an apply
+# only sticks when Orca is (re)started afterwards. To pin a new value: quit
+# Orca, chezmoi apply, reopen Orca.
+set -e
+
+managed=$(
+	cat <<'JSON'
+{
+  "defaultTuiAgent": "claude",
+  "agentDefaultArgs": {
+    "claude": "--permission-mode auto"
+  }
+}
+JSON
+)
+
+current=$(cat)
+
+# Missing file or no jq: pass through unchanged rather than risk corrupting
+# Orca's state file.
+if [ -z "$current" ] || ! command -v jq >/dev/null 2>&1; then
+	printf '%s' "$current"
+	exit 0
+fi
+
+# -c keeps Orca's compact single-line format so diffs stay minimal.
+printf '%s\n' "$current" | jq -c --argjson managed "$managed" \
+	'.settings = ((.settings // {}) * $managed)'

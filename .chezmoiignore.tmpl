@@ -27,4 +27,10 @@ README.md
 # macOS-specific configs - ignore on non-macOS systems
 .config/hammerspoon/
 .config/karabiner/
+Library/
+{{- end }}
+
+{{- if not (stat (joinPath .chezmoi.homeDir "Library/Application Support/Orca/profiles/local-default")) }}
+# Orca not installed on this machine - don't create a stray data file
+Library/Application Support/Orca/
 {{- end }}
