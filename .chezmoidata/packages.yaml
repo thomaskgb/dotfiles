@@ -37,6 +37,8 @@ packages:
       - hammerspoon
       - karabiner-elements
       - nikitabobko/tap/aerospace
+      # Fully qualified: the bare `orca` cask is plotly's deprecated tool
+      - stablyai/orca/orca
       - font-meslo-lg-nerd-font
       - caffeine
 

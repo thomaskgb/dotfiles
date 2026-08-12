@@ -57,6 +57,7 @@ echo "Installing macOS brews and casks..."
 # Tap required repositories
 brew tap nikitabobko/tap || true
 brew tap FelixKratz/formulae || true
+brew tap stablyai/orca || true
 
 # Install macOS-specific brews
 {{ range .packages.darwin.brews -}}
