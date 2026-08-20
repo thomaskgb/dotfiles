@@ -4,9 +4,10 @@
 # This is a chezmoi modify_ script rather than a plain tracked file because
 # Claude Code and its ecosystem rewrite ~/.claude/settings.json at runtime, so a
 # verbatim copy drifts constantly and every `chezmoi update` asks whether to
-# overwrite it. The keys below are shared across machines; the `hooks` block is
-# machine-local (whatever agent tooling is installed stamps its own hooks in) and
-# is carried over from whatever is already on disk.
+# overwrite it. The keys below are shared across machines; `hooks`,
+# `enabledPlugins` and `autoMode` are machine-local (agent tooling and Claude
+# Code itself stamp those in at runtime) and are carried over from whatever is
+# already on disk.
 set -e
 
 managed=$(
@@ -51,7 +52,11 @@ managed=$(
     "padding": 0
   },
   "customInstructions": "Always test changes after implementing them.",
-  "model": "claude-fable-5[1m]"
+  "model": "claude-opus-5[1m]",
+  "effortLevel": "high",
+  "env": {
+    "CLAUDE_CODE_ENABLE_TODO_TOOLS": "1"
+  }
 }
 JSON
 )
@@ -72,5 +77,9 @@ fi
 
 [ -n "$current" ] || current='{}'
 
-printf '%s\n' "$current" | jq --argjson managed "$managed" \
-	'$managed + (if has("hooks") then {hooks: .hooks} else {} end)'
+printf '%s\n' "$current" | jq --argjson managed "$managed" '
+	$managed
+	+ (if has("hooks") then {hooks} else {} end)
+	+ (if has("enabledPlugins") then {enabledPlugins} else {} end)
+	+ (if has("autoMode") then {autoMode} else {} end)
+'
