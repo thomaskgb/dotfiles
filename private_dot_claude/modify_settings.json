@@ -63,23 +63,47 @@ JSON
 
 # Empty stdin means the file does not exist yet on this machine.
 current=$(cat)
+[ -n "$current" ] || current='{}'
 
-# chezmoi applies ~/.claude before .chezmoiscripts, so on a fresh machine jq is
-# not installed yet. Degrade gracefully instead of failing the whole apply.
-if ! command -v jq >/dev/null 2>&1; then
-	if [ -n "$current" ]; then
-		printf '%s\n' "$current"
-	else
-		printf '%s\n' "$managed"
-	fi
+if command -v jq >/dev/null 2>&1; then
+	printf '%s\n' "$current" | jq --argjson managed "$managed" '
+		$managed
+		+ (if has("hooks") then {hooks} else {} end)
+		+ (if has("enabledPlugins") then {enabledPlugins} else {} end)
+		+ (if has("autoMode") then {autoMode} else {} end)
+	'
 	exit 0
 fi
 
-[ -n "$current" ] || current='{}'
+# chezmoi applies ~/.claude before .chezmoiscripts, so on a fresh machine jq is
+# not installed yet. python3 ships on every platform we target, so use it to do
+# the same merge instead of giving up.
+if command -v python3 >/dev/null 2>&1; then
+	MANAGED="$managed" CURRENT="$current" python3 -c '
+import json, os, sys
 
-printf '%s\n' "$current" | jq --argjson managed "$managed" '
-	$managed
-	+ (if has("hooks") then {hooks} else {} end)
-	+ (if has("enabledPlugins") then {enabledPlugins} else {} end)
-	+ (if has("autoMode") then {autoMode} else {} end)
+managed = json.loads(os.environ["MANAGED"])
+try:
+    current = json.loads(os.environ["CURRENT"])
+except ValueError:
+    current = {}
+if not isinstance(current, dict):
+    current = {}
+for key in ("hooks", "enabledPlugins", "autoMode"):
+    if key in current:
+        managed[key] = current[key]
+json.dump(managed, sys.stdout, indent=2, ensure_ascii=False)
+sys.stdout.write("\n")
 '
+	exit 0
+fi
+
+# Neither merger is available. Pass the file through untouched, but say so on
+# stderr: a silent passthrough leaves `chezmoi status` clean while none of the
+# managed keys ever reach disk, which hides the failure completely.
+printf '%s\n' "modify_settings.json: neither jq nor python3 found; ~/.claude/settings.json left unmanaged (model, effortLevel, permissions not applied). Install jq, then run: chezmoi apply ~/.claude/settings.json" >&2
+if [ "$current" = '{}' ]; then
+	printf '%s\n' "$managed"
+else
+	printf '%s\n' "$current"
+fi
