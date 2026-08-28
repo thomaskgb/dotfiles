@@ -25,6 +25,10 @@ CLAUDE.md
 # LazyVim state file — extras managed via lua/plugins/extras.lua instead
 .config/nvim/lazyvim.json
 
+# Plugin lockfile — deliberately not synced, so each machine resolves its own
+# plugin versions. Listed so a stray `chezmoi add` cannot pull it back in.
+.config/nvim/lazy-lock.json
+
 {{- if ne .chezmoi.os "darwin" }}
 # macOS-specific configs - ignore on non-macOS systems
 .config/hammerspoon/
