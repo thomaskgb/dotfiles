@@ -1,0 +1,522 @@
+#!/usr/bin/env python3
+"""Sort loose files out of the Google Drive root.
+
+Invoices are renamed to YYYYMMDD_Vendor.pdf and filed into the quarter folder
+that matches their *invoice date*, not the date they happened to be saved.
+Everything else goes to _inbox/<year>-Q<n>/ by save date.
+
+A Finder tag records where an invoice already is:
+  yellow  already at Yuki (arrived via Lucy, or CC'd to yukiworks.be)
+  orange  filed, but still needs uploading to Yuki yourself
+
+Every run writes a ledger so it can be undone in full.
+"""
+
+import argparse
+import hashlib
+import json
+import plistlib
+import re
+import shutil
+import subprocess
+import sys
+from datetime import datetime
+from pathlib import Path
+
+DRIVE = Path(
+    "/Users/thomas/Library/CloudStorage/GoogleDrive-thomas@tdlx.nl/My Drive"
+)
+FINANCES = DRIVE / "mission-control/2_🏙TDLX/10_TDLX-BE_admin/1_finances"
+INVOICES = FINANCES / "invoices"
+REVIEW = INVOICES / "_review"
+INBOX = DRIVE / "_inbox"
+ICLOUD_INBOX = Path.home() / "Library/Mobile Documents/com~apple~CloudDocs/inbox"
+
+# The Drive root should end up empty, so everything loose there is moved
+# somewhere. The other three are inboxes that only give up files this script is
+# confident about; anything else stays where its owner put it.
+SOURCES = [
+    # (folder, sweep_everything, recurse)
+    (DRIVE, True, False),
+    (ICLOUD_INBOX, False, False),
+    (INBOX, False, True),
+    (REVIEW, False, False),
+]
+
+# Documents whose home has not been decided yet. Left exactly where they are
+# rather than guessed at - see the TDLX simulaties, which could belong under
+# salary/vergoeding simulatie but that convention does not exist yet.
+LEAVE_ALONE = re.compile(r"simulatie|simulation", re.I)
+
+# Finance paperwork that is not an invoice still has a home of its own.
+# (pattern matched against filename + heading, destination under 1_finances)
+FINANCE_ROUTES = [
+    (r"jaarrekening|wettelijke verslaggeving|resultatenrekening"
+     r"|definitieve balans|liquiditeitstest", "jaarrekeningen"),
+    (r"bedrijfsvoorheffing", "salary/bedrijfsvoorheffing"),
+    (r"loonfiche|loonbrief|individuele rekening", "salary"),
+    (r"sociale bijdragen|sociaal secretariaat|attest sociale", "sociaal secretariaat"),
+    (r"btw-rekeninguittreksel|btw-aangifte|periodieke aangifte", "BTW"),
+    (r"rekeninguittreksel|creditcard overzicht", "bank"),
+]
+LEDGER_DIR = Path.home() / ".local/state/drive-tidy"
+
+# The year whose quarters live directly in invoices/Q1..Q4. Older years are
+# nested one level down (invoices/2025/Q3), which is the layout already in use.
+CURRENT_BOOK_YEAR = 2026
+
+TAG_COLORS = {"yellow": 6, "orange": 7, "gray": 1}
+
+# Vendor detection. First match wins, so the specific rules come first. Each is
+# (canonical name, pattern tested against the filename plus first-page text).
+VENDOR_RULES = [
+    ("TaxTeam", r"boekhoudkundige prestaties|Fiscaal advies|Yuki - Small|Neerlegging jaarrekening"),
+    ("Proximus", r"Proximus|Klantnummer\s+624783618"),
+    ("Monizze", r"Monizze|supportclient@monizze"),
+    ("OlympusMobility", r"Olympus Mobility"),
+    ("DeTijd", r"detijd@tdlx|Mediafin|Lezersservice"),
+    ("123inkt", r"123inkt"),
+    ("Energie", r"Energie\.be|afrekening van Energie"),
+    ("Google", r"Google Workspace|payments-noreply@google"),
+    ("Anthropic", r"Anthropic"),
+    ("Adobe", r"Adobe Systems|Adobe_Transaction"),
+    ("DigitalOcean", r"DigitalOcean"),
+    ("4411", r"4411\.be|Arrive Belgium"),
+    ("HotelDeHallen", r"Hotel De Hallen"),
+    ("ChateauDeVignee", r"chateaudevignee|Vign\S+e Management"),
+    ("EuropAssistance", r"Europ Assistance|BETALINGSBERICHT"),
+    ("Artimar", r"Artimar|Muurbekleding"),
+    ("Allianz", r"Allianz"),
+    ("Liantis", r"Liantis"),
+    ("Perplexity", r"Perplexity"),
+]
+
+# Invoices Lucy mailed us, or that were CC'd straight to Yuki. Confirmed against
+# Gmail. Replace this with a generated index once the Gmail half is wired up.
+ALREADY_AT_YUKI = {
+    "invoice-6a4d1453ce86af993b78cc0d.pdf",
+    "invoice-6a555fbfc2b29cbcda0e8930.pdf",
+    "invoice-6a567a11d03e1ddd39d9aeb0.pdf",
+    "invoice-6a6339c4e23981c9bc3f32f1.pdf",
+    "invoice-6a66c0649f1edb5c58937f77.pdf",
+    "invoice-6a6e13ddf4f5581f93fd8782.pdf",
+    "invoice-6a7358afb09a88304d02b989.pdf",
+    "invoice-6a75daf16ac597d45004c97b.pdf",
+    "invoice-6a7c8b6b61929cf78430d53b.pdf",
+    "invoice-6a892257b310a366a6ddfbfa.pdf",
+    "Factuur-33209963.pdf",
+    "factuur.pdf",
+    "tdlx-ent_IM 2026-08-4631981.pdf",
+}
+
+# Dates that only exist as a column header with the value on the line below,
+# which is not worth writing a table parser for.
+DATE_OVERRIDES = {
+    "invoice_263627890.pdf": "20260716",             # Energie.be, period to 01.07
+    "DigitalOcean Invoice 2026 Jul (9899505-550616058).pdf": "20260801",
+    "Factuur-33209963.pdf": "20260714",
+    "07-076 TDLX Enterprise (P-Patr-M-V)  .pdf": "20260720",   # Allianz premiebericht
+    "Factuur_met_overschrijvingsformulier_13237884.pdf": "20260802",  # date of the Europ Assistance mail
+}
+
+# Documents that look invoice-ish but need a human call before being booked.
+FORCE_REVIEW = {
+    "Factuur Herssens Magali-2603957.pdf":
+        "Artimar wall cladding, addressed to Herssens Magali at the home "
+        "address - looks personal rather than TDLX",
+    "Love Tomorrow Summit 2026 - order 167701429.pdf":
+        "Event order confirmation - business expense or personal?",
+}
+
+# Only the top of the first page counts: an invoice announces itself in its
+# heading, whereas annual accounts or a term sheet merely mention amounts.
+INVOICE_HEADING = re.compile(
+    r"\b(factuur|invoice|rechnung|bill|afrekening"
+    r"|premiebericht|vervaldagbericht|betalingsbericht)\b", re.I)
+HEADING_LINES = 25
+
+# Receipts photographed on the phone arrive already named to the convention,
+# and being scans they hold no extractable text - the filename is all there is.
+PRENAMED = re.compile(r"^(\d{8})[_-](.+)$")
+
+# Document types that talk about invoices without being one.
+NOT_INVOICE = re.compile(
+    r"term[_ ]sheet|jaarrekening|balans|verslaggeving|resultatenrekening"
+    r"|plan van aanpak|simulatie|factuurvoorwaarden|algemene voorwaarden"
+    r"|polis|bevestigingsbrief|termination|docusign|-signed|verzekeringsbewijs"
+    r"|crew|ticket|wealth_tracker|marathon|VLABEL",
+    re.I,
+)
+
+# Labelled dates come first: those are the invoice date rather than a due date.
+# Values sit far to the right in these layouts, hence the generous gap.
+GAP = r"[^\d\n]{0,40}"
+LAZY_GAP = r"[^\d\n]{0,40}?"
+DATE_PATTERNS = [
+    (r"(?:factuurdatum|datum factuur|invoice date|date of issue|belastingdatum"
+     r"|taxation date|publicatiedatum|issue date)" + GAP +
+     r"(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})", "dmy"),
+    (r"(?:factuurdatum|datum factuur|invoice date|date of issue|issue date)" +
+     LAZY_GAP + r"\b([A-Za-z]{3,9})\.?\s+(\d{1,2}),?\s+(\d{4})", "mdy_name"),
+    (r"^[ \t]*datum[ \t]*:?" + GAP + r"(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})", "dmy"),
+    (r"^[ \t]*date[ \t]*:?" + GAP + r"(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})", "dmy"),
+    (r"^[ \t]*datum[ \t]*:?" + GAP + r"(\d{1,2})\s+([a-z]+)\s+(\d{4})", "dmy_name"),
+]
+
+MONTHS_NL = {
+    "januari": 1, "februari": 2, "maart": 3, "april": 4, "mei": 5, "juni": 6,
+    "juli": 7, "augustus": 8, "september": 9, "oktober": 10, "november": 11,
+    "december": 12,
+}
+MONTHS_EN = {
+    "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6, "jul": 7,
+    "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
+}
+
+
+def pdf_text(path):
+    try:
+        out = subprocess.run(
+            ["pdftotext", "-f", "1", "-l", "2", "-layout", str(path), "-"],
+            capture_output=True, text=True, timeout=30,
+        )
+        return out.stdout
+    except (subprocess.SubprocessError, OSError):
+        return ""
+
+
+def find_invoice_date(text):
+    for pattern, kind in DATE_PATTERNS:
+        for m in re.finditer(pattern, text, re.I | re.M):
+            try:
+                if kind == "dmy":
+                    d, mo, y = int(m.group(1)), int(m.group(2)), int(m.group(3))
+                elif kind == "dmy_name":
+                    d = int(m.group(1))
+                    mo = MONTHS_NL.get(m.group(2).lower())
+                    y = int(m.group(3))
+                else:
+                    mo = MONTHS_EN.get(m.group(1)[:3].lower())
+                    d, y = int(m.group(2)), int(m.group(3))
+                if mo and 1 <= mo <= 12 and 1 <= d <= 31 and 2000 < y < 2100:
+                    return datetime(y, mo, d)
+            except (ValueError, TypeError):
+                continue
+    return None
+
+
+def date_from_filename(name):
+    m = re.search(r"(20\d{2})(\d{2})(\d{2})", name)
+    if not m:
+        return None
+    try:
+        return datetime(*(int(g) for g in m.groups()))
+    except ValueError:
+        return None
+
+
+def find_vendor(haystack):
+    for name, pattern in VENDOR_RULES:
+        if re.search(pattern, haystack, re.I | re.M):
+            return name
+    return None
+
+
+def quarter_dir(date):
+    q = f"Q{(date.month - 1) // 3 + 1}"
+    if date.year == CURRENT_BOOK_YEAR:
+        return INVOICES / q
+    return INVOICES / str(date.year) / q
+
+
+def unique_path(target):
+    """Follow the existing _2, _3 convention rather than clobbering."""
+    if not target.exists():
+        return target
+    n = 2
+    while True:
+        candidate = target.with_name(f"{target.stem}_{n}{target.suffix}")
+        if not candidate.exists():
+            return candidate
+        n += 1
+
+
+def set_tag(path, color):
+    data = plistlib.dumps([f"{color.capitalize()}\n{TAG_COLORS[color]}"],
+                          fmt=plistlib.FMT_BINARY)
+    subprocess.run(
+        ["xattr", "-wx", "com.apple.metadata:_kMDItemUserTags",
+         data.hex(), str(path)],
+        check=False, capture_output=True,
+    )
+
+
+def classify(path):
+    """Decide what should happen to one loose file."""
+    name = path.name
+    saved = datetime.fromtimestamp(path.stat().st_mtime)
+
+    if name in FORCE_REVIEW:
+        return {"action": "review", "reason": FORCE_REVIEW[name]}
+
+    prenamed = PRENAMED.match(path.stem)
+    if prenamed and path.suffix.lower() == ".pdf":
+        try:
+            date = datetime.strptime(prenamed.group(1), "%Y%m%d")
+        except ValueError:
+            date = None
+        if date:
+            return {"action": "file", "vendor": prenamed.group(2).strip(),
+                    "date": date,
+                    "tag": "yellow" if name in ALREADY_AT_YUKI else "orange"}
+
+    text = pdf_text(path) if path.suffix.lower() == ".pdf" else ""
+    haystack = f"{name}\n{text}"
+    heading = "\n".join(haystack.splitlines()[:HEADING_LINES])
+
+    if LEAVE_ALONE.search(name):
+        return {"action": "inbox", "saved": saved}
+
+    for pattern, subfolder in FINANCE_ROUTES:
+        if re.search(pattern, f"{name}\n{heading}", re.I):
+            year = re.search(r"(20\d{2})", name)
+            dest = FINANCES / subfolder
+            if subfolder == "jaarrekeningen" and year:
+                dest = dest / year.group(1)
+            return {"action": "finance", "dest_dir": dest}
+
+    if NOT_INVOICE.search(name):
+        return {"action": "inbox", "saved": saved}
+    if not INVOICE_HEADING.search(heading):
+        return {"action": "inbox", "saved": saved}
+
+    vendor = find_vendor(haystack)
+    if name in DATE_OVERRIDES:
+        date = datetime.strptime(DATE_OVERRIDES[name], "%Y%m%d")
+    else:
+        date = find_invoice_date(text) or date_from_filename(name)
+
+    if not vendor or not date:
+        missing = "vendor" if not vendor else "invoice date"
+        return {"action": "review",
+                "reason": f"reads like an invoice but the {missing} "
+                          f"could not be determined"}
+
+    return {
+        "action": "file",
+        "vendor": vendor,
+        "date": date,
+        "tag": "yellow" if name in ALREADY_AT_YUKI else "orange",
+    }
+
+
+def archive_digests():
+    """md5 -> filed name, for every PDF already in the invoice archive."""
+    digests = {}
+    if not INVOICES.is_dir():
+        return digests
+    for f in INVOICES.rglob("*.pdf"):
+        if f.name.startswith(".") or REVIEW in f.parents:
+            continue  # the review bucket is a waiting room, not the archive
+        try:
+            digests.setdefault(hashlib.md5(f.read_bytes()).hexdigest(),
+                               str(f.relative_to(INVOICES)))
+        except OSError:
+            continue
+    return digests
+
+
+def filing_key(stem):
+    """Compare "20260119_Hotel de hallen" and "20260119_HotelDeHallen_2" alike."""
+    stem = re.sub(r"_\d+$", "", stem)
+    return re.sub(r"[^a-z0-9]", "", stem.lower())
+
+
+def already_filed(src, dest):
+    """Has this invoice been filed before? Returns (action, existing name)."""
+    folder = dest.parent
+    if not folder.is_dir():
+        return None
+
+    digest = hashlib.md5(src.read_bytes()).hexdigest()
+    key = filing_key(dest.stem)
+    name_match = None
+    for existing in folder.iterdir():
+        if not existing.is_file() or existing.name.startswith("."):
+            continue
+        if hashlib.md5(existing.read_bytes()).hexdigest() == digest:
+            return ("duplicate", existing.name)
+        if filing_key(existing.stem) == key:
+            name_match = existing.name
+    if name_match:
+        return ("review", name_match)
+    return None
+
+
+def canonical_first(path):
+    """"Factuur (1).pdf" should lose to "Factuur.pdf", not the other way up."""
+    return (1 if re.search(r"\(\d+\)", path.stem) else 0, path.name)
+
+
+def build_plan():
+    plan, seen = [], {}
+    filed = archive_digests()
+    entries = []
+    for folder, sweep_all, recurse in SOURCES:
+        if not folder.is_dir():
+            continue
+        found = folder.rglob("*") if recurse else folder.iterdir()
+        entries += [(f, sweep_all)
+                    for f in sorted(found, key=canonical_first)]
+
+    for path, sweep_all in entries:
+        if path.is_dir() or path.name.startswith("."):
+            continue
+
+        if path.suffix.lower() == ".pdf":
+            digest = hashlib.md5(path.read_bytes()).hexdigest()
+            if digest in filed:
+                plan.append({"src": path, "action": "duplicate",
+                             "of": f"{filed[digest]} (already filed)"})
+                continue
+            if digest in seen:
+                plan.append({"src": path, "action": "duplicate",
+                             "of": seen[digest]})
+                continue
+            seen[digest] = path.name
+
+        item = classify(path)
+        item["src"] = path
+        if item["action"] == "inbox" and not sweep_all:
+            continue  # not a receipt; leave it where its owner put it
+
+        if item["action"] == "file":
+            item["dest"] = (quarter_dir(item["date"]) /
+                            f"{item['date']:%Y%m%d}_{item['vendor']}.pdf")
+            # Refuse to file a second copy of an invoice that is already there.
+            prior = already_filed(path, item["dest"])
+            if prior and prior[0] == "duplicate":
+                plan.append({"src": path, "action": "duplicate",
+                             "of": f"{prior[1]} (already filed)"})
+                continue
+            if prior:
+                item = {"src": path, "action": "review",
+                        "dest": REVIEW / path.name,
+                        "reason": f"{item['vendor']} invoice for this date is "
+                                  f"already filed as {prior[1]}, but the bytes "
+                                  f"differ - check which copy to keep"}
+        elif item["action"] == "finance":
+            item["dest"] = item["dest_dir"] / path.name
+        elif item["action"] == "review":
+            item["dest"] = REVIEW / path.name
+        else:
+            saved = item["saved"]
+            item["dest"] = (INBOX /
+                            f"{saved.year}-Q{(saved.month - 1) // 3 + 1}" /
+                            path.name)
+
+        if item.get("dest") == path:
+            continue
+        plan.append(item)
+    return plan
+
+
+def render(plan):
+    groups = {"file": [], "finance": [], "review": [], "inbox": [],
+              "duplicate": []}
+    for item in plan:
+        groups[item["action"]].append(item)
+
+    for item in sorted(groups["file"], key=lambda i: i["dest"].name):
+        print(f"  [{item['tag']:6}] {item['src'].name[:50]:50} -> "
+              f"{item['dest'].relative_to(INVOICES)}")
+    for item in groups["finance"]:
+        print(f"  [filing] {item['src'].name[:50]:50} -> "
+              f"{item['dest'].parent.relative_to(FINANCES)}/")
+    for item in groups["review"]:
+        print(f"  [review] {item['src'].name[:50]:50} -- {item['reason']}")
+    for item in groups["inbox"]:
+        print(f"  [inbox ] {item['src'].name[:50]:50} -> "
+              f"_inbox/{item['dest'].parent.name}/")
+    for item in groups["duplicate"]:
+        print(f"  [dupe  ] {item['src'].name[:50]:50} == {item['of']}")
+
+    print(f"\n  {len(groups['file'])} invoices, "
+          f"{len(groups['finance'])} filed elsewhere, "
+          f"{len(groups['review'])} to "
+          f"review, {len(groups['inbox'])} to inbox, "
+          f"{len(groups['duplicate'])} duplicates")
+
+
+def apply_plan(plan, keep_duplicates):
+    LEDGER_DIR.mkdir(parents=True, exist_ok=True)
+    moves = []
+    for item in plan:
+        src = item["src"]
+        if item["action"] == "duplicate":
+            if keep_duplicates:
+                continue
+            dest = unique_path(REVIEW / "_duplicates" / src.name)
+        else:
+            dest = unique_path(item["dest"])
+
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(src), str(dest))
+        if item.get("tag"):
+            set_tag(dest, item["tag"])
+        moves.append({"from": str(src), "to": str(dest), "tag": item.get("tag")})
+
+    ledger = LEDGER_DIR / f"run-{datetime.now():%Y%m%dT%H%M%S}.json"
+    ledger.write_text(json.dumps(moves, indent=2))
+    print(f"\nMoved {len(moves)} files. Undo with:\n"
+          f"  {sys.argv[0]} --undo {ledger}")
+
+
+def undo(ledger_path):
+    moves = json.loads(Path(ledger_path).read_text())
+    restored = 0
+    for move in reversed(moves):
+        dest, src = Path(move["to"]), Path(move["from"])
+        if not dest.exists():
+            print(f"  missing, skipped: {dest.name}")
+            continue
+        src.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(dest), str(unique_path(src)))
+        restored += 1
+    print(f"Restored {restored} of {len(moves)} files.")
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--apply", action="store_true",
+                    help="actually move files (default is a dry run)")
+    ap.add_argument("--undo", metavar="LEDGER",
+                    help="reverse a previous run from its ledger file")
+    ap.add_argument("--keep-duplicates", action="store_true",
+                    help="leave byte-identical copies in place")
+    args = ap.parse_args()
+
+    if args.undo:
+        undo(args.undo)
+        return
+
+    if not DRIVE.is_dir():
+        sys.exit(f"Google Drive is not mounted at {DRIVE}")
+
+    plan = build_plan()
+    render(plan)
+    left = sum(1 for f in ICLOUD_INBOX.iterdir()
+               if f.is_file() and not f.name.startswith(".")) if \
+        ICLOUD_INBOX.is_dir() else 0
+    moving = sum(1 for i in plan if str(i["src"]).startswith(str(ICLOUD_INBOX)))
+    if left:
+        print(f"  ({left - moving} non-receipt files left alone in the "
+              f"iCloud inbox)")
+    if args.apply:
+        apply_plan(plan, args.keep_duplicates)
+    else:
+        print("\nDry run - nothing moved. Re-run with --apply.")
+
+
+if __name__ == "__main__":
+    main()
