@@ -42,6 +42,17 @@ answer a question than find a document filed somewhere invented.
 Duplicates are moved to `_review/_duplicates`, never deleted, unless the user
 explicitly asks for a deletion after the md5 match has been shown to them.
 
+**Not everything that arrives belongs to TDLX.** Utility bills for Bremtstraat
+are addressed to the household, not the company, and booking one as a business
+cost is a real error. `HOUSEHOLD_ROUTES` diverts those to
+`3_👫shared/10_admin/16_Bremtstraat/…` before any invoice logic runs.
+
+The reliable test is **who the invoice is addressed to**, not which vendor sent
+it. If the text names neither TDLX nor VAT `BE1010144439`, it is probably not a
+company cost - ask rather than filing it into a quarter folder. Photographed
+receipts carry no text at all, so they cannot be checked this way and are taken
+on trust from the filename the user gave them.
+
 Non-invoice finance paperwork is routed under `1_finances` by `FINANCE_ROUTES`:
 annual accounts to `jaarrekeningen/<year>`, payroll to `salary`, withholding
 tax to `salary/bedrijfsvoorheffing`, share-option paperwork (term sheets, offer

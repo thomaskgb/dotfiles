@@ -29,6 +29,7 @@ DRIVE = Path(
 FINANCES = DRIVE / "mission-control/2_🏙TDLX/10_TDLX-BE_admin/1_finances"
 INVOICES = FINANCES / "invoices"
 REVIEW = INVOICES / "_review"
+BREMTSTRAAT = DRIVE / "mission-control/3_👫shared/10_admin/16_Bremtstraat"
 INBOX = DRIVE / "_inbox"
 ICLOUD_INBOX = Path.home() / "Library/Mobile Documents/com~apple~CloudDocs/inbox"
 
@@ -47,6 +48,17 @@ SOURCES = [
 # rather than guessed at - see the TDLX simulaties, which could belong under
 # salary/vergoeding simulatie but that convention does not exist yet.
 LEAVE_ALONE = re.compile(r"simulatie|simulation", re.I)
+
+# Not everything that arrives is TDLX's. A utility bill for Bremtstraat is
+# addressed to the household, not to the company, and must never be booked as a
+# business cost. Vendor alone is not enough to tell - check who it is addressed
+# to - but these vendors only ever bill the house.
+HOUSEHOLD_ROUTES = [
+    (r"energie\.be|afrekening van Energie",
+     BREMTSTRAAT / "8_utilities/energie.be/invoices"),
+    (r"\bfluvius\b", BREMTSTRAAT / "8_utilities/fluvius"),
+    (r"watergroep", BREMTSTRAAT / "8_utilities/watergroep"),
+]
 
 # Finance paperwork that is not an invoice still has a home of its own.
 # (pattern matched against filename + heading, destination under 1_finances)
@@ -289,6 +301,11 @@ def classify(path):
     if path.suffix.lower() != ".pdf":
         return {"action": "inbox", "saved": saved}
 
+    text_probe = pdf_text(path)
+    for pattern, dest in HOUSEHOLD_ROUTES:
+        if re.search(pattern, f"{name}\n{text_probe}", re.I):
+            return {"action": "household", "dest_dir": dest}
+
     prenamed = PRENAMED.match(path.stem)
     if prenamed and path.suffix.lower() == ".pdf":
         try:
@@ -435,6 +452,8 @@ def build_plan():
                         "reason": f"{item['vendor']} invoice for this date is "
                                   f"already filed as {prior[1]}, but the bytes "
                                   f"differ - check which copy to keep"}
+        elif item["action"] == "household":
+            item["dest"] = item["dest_dir"] / path.name
         elif item["action"] == "finance":
             item["dest"] = item["dest_dir"] / path.name
             if item["dest"].exists():
@@ -458,14 +477,17 @@ def build_plan():
 
 
 def render(plan):
-    groups = {"file": [], "finance": [], "review": [], "inbox": [],
-              "duplicate": []}
+    groups = {"file": [], "finance": [], "household": [], "review": [],
+              "inbox": [], "duplicate": []}
     for item in plan:
         groups[item["action"]].append(item)
 
     for item in sorted(groups["file"], key=lambda i: i["dest"].name):
         print(f"  [{item['tag']:9}] {item['src'].name[:50]:50} -> "
               f"{item['dest'].relative_to(INVOICES)}")
+    for item in groups["household"]:
+        print(f"  [house ] {item['src'].name[:50]:50} -> "
+              f"{item['dest'].parent.relative_to(BREMTSTRAAT)}/")
     for item in groups["finance"]:
         print(f"  [filing] {item['src'].name[:50]:50} -> "
               f"{item['dest'].parent.relative_to(FINANCES)}/")
@@ -479,6 +501,7 @@ def render(plan):
 
     print(f"\n  {len(groups['file'])} invoices, "
           f"{len(groups['finance'])} filed elsewhere, "
+          f"{len(groups['household'])} household, "
           f"{len(groups['review'])} to "
           f"review, {len(groups['inbox'])} to inbox, "
           f"{len(groups['duplicate'])} duplicates")
