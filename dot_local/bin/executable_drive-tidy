@@ -6,8 +6,8 @@ that matches their *invoice date*, not the date they happened to be saved.
 Everything else goes to _inbox/<year>-Q<n>/ by save date.
 
 A Finder tag records where an invoice already is:
-  yellow  already at Yuki (arrived via Lucy, or CC'd to yukiworks.be)
-  orange  filed, but still needs uploading to Yuki yourself
+  yuki       already at Yuki (arrived via Lucy, or CC'd to yukiworks.be)
+  to_upload  filed, but still needs uploading to Yuki yourself
 
 Every run writes a ledger so it can be undone in full.
 """
@@ -65,7 +65,11 @@ LEDGER_DIR = Path.home() / ".local/state/drive-tidy"
 # nested one level down (invoices/2025/Q3), which is the layout already in use.
 CURRENT_BOOK_YEAR = 2026
 
-TAG_COLORS = {"yellow": 6, "orange": 7, "gray": 1}
+# Finder tag name -> macOS colour index. The name is what the user reads in the
+# sidebar, so it says what it means rather than naming a colour. Indices matter:
+# writing the wrong one shows the wrong colour regardless of the name.
+# 1 gray, 2 green, 3 purple, 4 blue, 5 yellow, 6 red, 7 orange.
+TAGS = {"yuki": 5, "to_upload": 6}
 
 # Vendor detection. First match wins, so the specific rules come first. Each is
 # (canonical name, pattern tested against the filename plus first-page text).
@@ -91,9 +95,11 @@ VENDOR_RULES = [
     ("Perplexity", r"Perplexity"),
 ]
 
-# Invoices Lucy mailed us, or that were CC'd straight to Yuki. Confirmed against
-# Gmail. Replace this with a generated index once the Gmail half is wired up.
-ALREADY_AT_YUKI = {
+# Invoices Lucy mailed us, or that were CC'd straight to Yuki, so Yuki already
+# has them. This script cannot reach Gmail itself; the agent running it can, and
+# refreshes YUKI_INDEX before each run (see the skill). The seed below is the
+# snapshot taken when the archive was first sorted, and stays as a fallback.
+YUKI_SEED = {
     "invoice-6a4d1453ce86af993b78cc0d.pdf",
     "invoice-6a555fbfc2b29cbcda0e8930.pdf",
     "invoice-6a567a11d03e1ddd39d9aeb0.pdf",
@@ -108,6 +114,25 @@ ALREADY_AT_YUKI = {
     "factuur.pdf",
     "tdlx-ent_IM 2026-08-4631981.pdf",
 }
+
+YUKI_INDEX = Path.home() / ".local/state/drive-tidy/yuki-index.json"
+
+
+def load_yuki_index():
+    """Filenames known to be at Yuki, refreshed from Gmail by the caller."""
+    names = set(YUKI_SEED)
+    if not YUKI_INDEX.exists():
+        return names, None
+    try:
+        data = json.loads(YUKI_INDEX.read_text())
+        names |= set(data.get("filenames", []))
+        return names, data.get("refreshed")
+    except (OSError, ValueError):
+        return names, None
+
+
+ALREADY_AT_YUKI, YUKI_REFRESHED = load_yuki_index()
+
 
 # Dates that only exist as a column header with the value on the line below,
 # which is not worth writing a table parser for.
@@ -242,8 +267,7 @@ def unique_path(target):
 
 
 def set_tag(path, color):
-    data = plistlib.dumps([f"{color.capitalize()}\n{TAG_COLORS[color]}"],
-                          fmt=plistlib.FMT_BINARY)
+    data = plistlib.dumps([f"{color}\n{TAGS[color]}"], fmt=plistlib.FMT_BINARY)
     subprocess.run(
         ["xattr", "-wx", "com.apple.metadata:_kMDItemUserTags",
          data.hex(), str(path)],
@@ -268,7 +292,7 @@ def classify(path):
         if date:
             return {"action": "file", "vendor": prenamed.group(2).strip(),
                     "date": date,
-                    "tag": "yellow" if name in ALREADY_AT_YUKI else "orange"}
+                    "tag": "yuki" if name in ALREADY_AT_YUKI else "to_upload"}
 
     text = pdf_text(path) if path.suffix.lower() == ".pdf" else ""
     haystack = f"{name}\n{text}"
@@ -306,7 +330,7 @@ def classify(path):
         "action": "file",
         "vendor": vendor,
         "date": date,
-        "tag": "yellow" if name in ALREADY_AT_YUKI else "orange",
+        "tag": "yuki" if name in ALREADY_AT_YUKI else "to_upload",
     }
 
 
@@ -428,7 +452,7 @@ def render(plan):
         groups[item["action"]].append(item)
 
     for item in sorted(groups["file"], key=lambda i: i["dest"].name):
-        print(f"  [{item['tag']:6}] {item['src'].name[:50]:50} -> "
+        print(f"  [{item['tag']:9}] {item['src'].name[:50]:50} -> "
               f"{item['dest'].relative_to(INVOICES)}")
     for item in groups["finance"]:
         print(f"  [filing] {item['src'].name[:50]:50} -> "
@@ -503,6 +527,12 @@ def main():
     if not DRIVE.is_dir():
         sys.exit(f"Google Drive is not mounted at {DRIVE}")
 
+    if YUKI_REFRESHED:
+        print(f"  Yuki index refreshed {YUKI_REFRESHED}\n")
+    else:
+        print("  WARNING: no Yuki index; falling back to the original snapshot,\n"
+              "  so invoices that reached Yuki via Lucy since then will be\n"
+              "  tagged red. Refresh it from Gmail first - see the skill.\n")
     plan = build_plan()
     render(plan)
     left = sum(1 for f in ICLOUD_INBOX.iterdir()
