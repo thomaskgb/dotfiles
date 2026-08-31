@@ -1,14 +1,22 @@
 ---
 name: wrap-up
 description: >-
-  Finish an Orca worktree session: verify the branch is pushed/merged and the
-  tree is clean, check the project's Notion docs for staleness and update them,
-  then archive the Orca worktree and close the session. Use when the user says
-  "wrap up", "wrap-up", "close this worktree", "archive this worktree",
+  Finish a session: verify the branch is pushed/merged and the tree is clean,
+  check the project's Notion docs for staleness and update them, then close the
+  session. Applies to BOTH kinds of session - in a child worktree it archives
+  the worktree, and in a repo's main checkout it deletes nothing and closes the
+  session's terminal instead. Use when the user says "wrap up", "wrap-up",
+  "close this session", "close this worktree", "archive this worktree",
   "archive and close", or "we're done here".
 ---
 
-# Wrap up an Orca worktree session
+# Wrap up an Orca session
+
+Works in any Orca session, not only a child worktree. Phase 3 branches on which
+kind this is: a child worktree gets archived, a main checkout gets its terminal
+closed and nothing deleted. Check with `ORCA worktree current --json` and read
+`isMainWorktree` before assuming. Never skip this skill just because the session
+is a main checkout - closing it is still the right ending.
 
 Run the phases in order. Phases 1 and 2 must both finish before phase 3 — the
 last command deletes the checkout and kills this session's terminal, so
