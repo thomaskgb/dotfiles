@@ -44,7 +44,18 @@ explicitly asks for a deletion after the md5 match has been shown to them.
 
 Non-invoice finance paperwork is routed under `1_finances` by `FINANCE_ROUTES`:
 annual accounts to `jaarrekeningen/<year>`, payroll to `salary`, withholding
-tax to `salary/bedrijfsvoorheffing`, plus `sociaal secretariaat`, `BTW`, `bank`.
+tax to `salary/bedrijfsvoorheffing`, share-option paperwork (term sheets, offer
+acceptances, sales contracts) to `salary/Thomas/aandelenopties`, plus
+`sociaal secretariaat`, `BTW` and `bank`.
+
+Before adding a route, look inside the target folders rather than only at the
+top level of `1_finances` - `aandelenopties` sits two levels down and was missed
+on the first pass, so every term sheet went to the inbox instead.
+
+The option folder receives files whose names the vendor reuses across different
+grants. When a name already exists there with different bytes, the incoming file
+goes to `_review` rather than being suffixed `_2`, because the suffix would
+destroy any way of telling the two grants apart.
 
 Invoices are renamed `YYYYMMDD_Vendor.pdf` and filed by **invoice date**, not
 save date, into `invoices/Q<n>` for the current book year or

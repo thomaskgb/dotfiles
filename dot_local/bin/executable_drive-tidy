@@ -53,6 +53,9 @@ LEAVE_ALONE = re.compile(r"simulatie|simulation", re.I)
 FINANCE_ROUTES = [
     (r"jaarrekening|wettelijke verslaggeving|resultatenrekening"
      r"|definitieve balans|liquiditeitstest", "jaarrekeningen"),
+    (r"term[_ ]sheet|option_contract|offer_acceptance|claims_sales_purchase"
+     r"|sales_contract|aandelenoptie|optifin|warrant",
+     "salary/Thomas/aandelenopties"),
     (r"bedrijfsvoorheffing", "salary/bedrijfsvoorheffing"),
     (r"loonfiche|loonbrief|individuele rekening", "salary"),
     (r"sociale bijdragen|sociaal secretariaat|attest sociale", "sociaal secretariaat"),
@@ -231,7 +234,7 @@ def find_invoice_date(text):
 
 
 def date_from_filename(name):
-    m = re.search(r"(20\d{2})(\d{2})(\d{2})", name)
+    m = re.search(r"(20\d{2})[-_]?(\d{2})[-_]?(\d{2})", name)
     if not m:
         return None
     try:
@@ -282,6 +285,9 @@ def classify(path):
 
     if name in FORCE_REVIEW:
         return {"action": "review", "reason": FORCE_REVIEW[name]}
+
+    if path.suffix.lower() != ".pdf":
+        return {"action": "inbox", "saved": saved}
 
     prenamed = PRENAMED.match(path.stem)
     if prenamed and path.suffix.lower() == ".pdf":
@@ -335,16 +341,16 @@ def classify(path):
 
 
 def archive_digests():
-    """md5 -> filed name, for every PDF already in the invoice archive."""
+    """md5 -> filed name, for every PDF already filed under 1_finances."""
     digests = {}
-    if not INVOICES.is_dir():
+    if not FINANCES.is_dir():
         return digests
-    for f in INVOICES.rglob("*.pdf"):
+    for f in FINANCES.rglob("*.pdf"):
         if f.name.startswith(".") or REVIEW in f.parents:
             continue  # the review bucket is a waiting room, not the archive
         try:
             digests.setdefault(hashlib.md5(f.read_bytes()).hexdigest(),
-                               str(f.relative_to(INVOICES)))
+                               str(f.relative_to(FINANCES)))
         except OSError:
             continue
     return digests
@@ -431,6 +437,12 @@ def build_plan():
                                   f"differ - check which copy to keep"}
         elif item["action"] == "finance":
             item["dest"] = item["dest_dir"] / path.name
+            if item["dest"].exists():
+                item = {"src": path, "action": "review",
+                        "dest": REVIEW / path.name,
+                        "reason": f"a different file of this exact name is "
+                                  f"already in {item['dest_dir'].name}/ - "
+                                  f"compare before filing"}
         elif item["action"] == "review":
             item["dest"] = REVIEW / path.name
         else:
