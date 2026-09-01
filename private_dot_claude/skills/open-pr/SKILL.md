@@ -1,6 +1,6 @@
 ---
 name: open-pr
-description: Open or update a pull request for the current repo. Use whenever work is ready to ship (user says "commit", "PR", "push", or approves changes). Never push to the default branch directly; merging is the user's call.
+description: Open or update a pull request on a GitHub repo. Use whenever work is ready to ship (user says "commit", "PR", "push", or approves changes) AND `git remote -v` points at github.com. Never push to the default branch directly; merging is the user's call. Do NOT use on a GitLab repo (merge requests, `glab`) - those repos ship through their own skills, so use the repo's MR flow instead.
 ---
 
 # Open a PR
@@ -9,8 +9,17 @@ Work ships through pull requests. Never push to the default branch (`main`/`mast
 directly, and never merge a PR yourself: opening it is the job, merging is the user's
 decision.
 
-If the repo has its own `.claude/skills/open-pr`, that one wins: it carries the
-build command, deploy behaviour and known traps for that project.
+## Check this skill applies before running it
+
+Two ways this skill is the wrong one for the repo you are in. Check both first.
+
+1. **Wrong forge.** Run `git remote -v`. If the remote is not `github.com`, stop.
+   A `gitlab.com` remote means the repo ships through merge requests and `glab`,
+   not `gh` - hand off to that repo's own skills or commands (in `sitemark/fuse`:
+   `/create-merge-request`, then `review-mr` / `fix-mr` / `ship-mr`) and do not
+   run any step below. Same for any other non-GitHub forge: ask rather than guess.
+2. **Repo has its own.** If the repo has its own `.claude/skills/open-pr`, that one
+   wins: it carries the build command, deploy behaviour and known traps for that project.
 
 ## Steps
 
