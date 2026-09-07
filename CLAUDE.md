@@ -174,8 +174,12 @@ See `.chezmoiignore.tmpl` for examples of conditional file inclusion.
 ## SSH Configuration
 
 - **SSH agent**: Strongbox password manager provides SSH agent
-- **Socket location**: `~/.config/strongbox/agent.sock`
-- **Environment variable**: `SSH_AUTH_SOCK` set in `.zshrc`
+- **Socket location**: `~/.strongbox/agent.sock` (symlink Strongbox creates to its
+  agent in `~/Library/Group Containers/group.strongbox.mac.mcguill/agent.sock`)
+- **Used by ssh via**: `IdentityAgent` in `~/.ssh/config`, which takes precedence
+  over `SSH_AUTH_SOCK`
+- **Environment variable**: `SSH_AUTH_SOCK` exported in `.zshrc` for non-ssh tools
+  that read it directly
 
 ## Testing & Verification
 

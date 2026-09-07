@@ -36,7 +36,10 @@ setopt PUSHD_SILENT
 source "$XDG_CONFIG_HOME/zsh/aliases.zsh"
 
 # enable strongbox ssh socket
-SSH_AUTH_SOCK=~/.config/strongbox/agent.sock
+# ssh itself uses `IdentityAgent` in ~/.ssh/config, which takes precedence over
+# this variable. It is exported for the non-ssh tools that read SSH_AUTH_SOCK
+# directly (docker --ssh default, VS Code Remote, ansible, ...).
+export SSH_AUTH_SOCK="$HOME/.strongbox/agent.sock"
 
 bindkey '^o' fzf-cd-widget
 
