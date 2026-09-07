@@ -139,13 +139,32 @@ These refresh weekly (168h period).
    chezmoi apply  # Apply changes
    ```
 
-4. **Commit to repository**:
+4. **Ship through a pull request**:
    ```bash
    cd ~/.local/share/chezmoi
+   git fetch origin
+   git checkout -b conf/<short-description> origin/main
    git add .
    git commit -m "description"
-   git push
+   git push -u origin conf/<short-description>
+   gh pr create
    ```
+
+   Do not push to `main` directly. `main` is deliberately left unprotected so a
+   genuine emergency one-liner is still possible, but the default path is a
+   branch and a PR. Merging is a decision, not a step: leave it to the repo
+   owner. See `.claude/skills/open-pr/SKILL.md` for the validation this repo
+   expects before a PR goes up.
+
+5. **After the PR merges**, bring the local source dir back in line:
+   ```bash
+   cd ~/.local/share/chezmoi
+   git checkout main
+   git pull
+   ```
+   Note that `chezmoi update` runs `git pull` in this directory and then applies.
+   Run it while a feature branch is checked out and it pulls that branch, not
+   `main`. Switch back to `main` first.
 
 ### Adding New Tools
 
@@ -200,13 +219,24 @@ After making changes:
    chezmoi verify  # Verify target state matches source
    ```
 
-3. **Fresh apply test**:
+3. **Check every template renders**:
    ```bash
-   chezmoi apply --dry-run --verbose
+   chezmoi archive --output=/dev/null
    ```
+   This builds the full target state without writing to `$HOME`, and reports
+   `template: <source file>:<line>` for a bad template. Prefer it over
+   `chezmoi apply --dry-run`, which stops to prompt when a target has drifted
+   and so fails with `could not open a new TTY` wherever there is no terminal.
 
 ## Common Gotchas
 
 1. **Homebrew path differences**: Different paths for Apple Silicon vs Intel Macs (handled in `.zshenv`)
 2. **Plugin load order**: zsh-autocomplete must load after oh-my-zsh
 3. **Hammerspoon config path**: Must be set via `defaults write` (not automatic)
+4. **Blanket `chezmoi apply` overwrites local edits**: `chezmoi status` normally
+   lists a few targets as `MM`, meaning the file on disk has drifted from the
+   source (`.claude/settings.json` and `.config/git/config` are usually among
+   them). A bare `chezmoi apply` silently discards that drift. When a change
+   touches one file, apply just that file: `chezmoi apply ~/.config/zsh/.zshrc`.
+5. **`chezmoi update` is `git pull` plus apply**: it acts on whatever branch the
+   source dir has checked out. See step 5 of the workflow above.
