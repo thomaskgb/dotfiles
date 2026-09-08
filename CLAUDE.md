@@ -240,3 +240,13 @@ After making changes:
    touches one file, apply just that file: `chezmoi apply ~/.config/zsh/.zshrc`.
 5. **`chezmoi update` is `git pull` plus apply**: it acts on whatever branch the
    source dir has checked out. See step 5 of the workflow above.
+6. **`TERM=xterm-kitty` on a remote Linux box**: kitty sets this, but most Linux
+   hosts have no terminfo entry under that name (Debian/Ubuntu ship it as plain
+   `kitty` in `ncurses-term`; the `xterm-kitty` name is in the separate
+   `kitty-terminfo` package). With no entry zsh gets an empty `$terminfo`, so
+   the line editor misdraws (text shifts while typing) and zsh-autocomplete
+   fails on `terminfo[kcbt]: parameter not set`.
+   `.chezmoiscripts/run_onchange_install-kitty-terminfo.sh` fixes this at apply
+   time by copying the local entry into `~/.terminfo` under both names. Check a
+   host with `zsh -f -c 'zmodload zsh/terminfo; echo ${#terminfo}'`. Zero means
+   the entry is missing.
