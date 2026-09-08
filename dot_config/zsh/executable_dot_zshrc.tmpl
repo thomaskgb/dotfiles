@@ -35,6 +35,13 @@ setopt PUSHD_SILENT
 # source aliases
 source "$XDG_CONFIG_HOME/zsh/aliases.zsh"
 
+{{- if eq .chezmoi.os "darwin" }}
+
+# source Cloudflare API helpers. macOS only: the token lives in the login
+# keychain, and this is deliberately not deployed to servers.
+[[ ! -r "$XDG_CONFIG_HOME/zsh/cloudflare.zsh" ]] || source "$XDG_CONFIG_HOME/zsh/cloudflare.zsh"
+{{- end }}
+
 # enable strongbox ssh socket
 # ssh itself uses `IdentityAgent` in ~/.ssh/config, which takes precedence over
 # this variable. It is exported for the non-ssh tools that read SSH_AUTH_SOCK
