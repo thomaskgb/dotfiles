@@ -99,6 +99,12 @@ This system strictly follows the XDG Base Directory Specification:
 #### Karabiner (Keyboard Customization)
 - **Config location**: `~/.config/karabiner/`
 
+#### Calendr (Menu Bar Calendar)
+- **Install**: `calendr` cask, listed in `.chezmoidata/packages.yaml`
+- **Config location**: sandboxed, `~/Library/Containers/br.paker.Calendr/Data/Library/Preferences/br.paker.Calendr.plist`
+- **Setup**: preferences are written by `.chezmoiscripts/run_once_configure-calendr.sh.tmpl`, not by tracking the plist. `defaults` redirects the `br.paker.Calendr` domain into the container, so plain `defaults write` works.
+- **Deliberately not pinned**: menu bar item positions and per-calendar lists (machine- and account-specific)
+
 ### Package Management
 
 Packages are defined in `.chezmoidata/packages.yaml` with platform-specific lists:

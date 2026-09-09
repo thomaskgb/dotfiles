@@ -27,6 +27,7 @@ chezmoi apply
 - **Hammerspoon** - macOS automation and window management
 - **AeroSpace** - Tiling window manager
 - **Karabiner** - Advanced keyboard customization
+- **Calendr** - Menu bar calendar, preferences pinned via a run_once script
 
 ## Features
 
