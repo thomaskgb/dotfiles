@@ -1,0 +1,45 @@
+#!/bin/bash
+# Configure Calendr (menu bar calendar) preferences
+#
+# Calendr is sandboxed, so its preferences live in
+# ~/Library/Containers/br.paker.Calendr/Data/Library/Preferences.
+# `defaults` redirects the domain into that container automatically, so the
+# plain domain name is enough here.
+#
+# Only real preference choices are set. Menu bar item positions
+# (NSStatusItem Preferred Position ...) and per-calendar lists are deliberately
+# left out: they are machine- and account-specific.
+
+{{ if eq .chezmoi.os "darwin" -}}
+echo "Configuring Calendr preferences..."
+
+# cfprefsd caches preferences for a running app and would overwrite these
+# writes on quit, so stop Calendr first and relaunch it at the end.
+calendr_was_running=false
+if pgrep -x Calendr >/dev/null 2>&1; then
+    calendr_was_running=true
+    osascript -e 'quit app "Calendr"' >/dev/null 2>&1 || killall Calendr || true
+    # Give cfprefsd a moment to flush the app's own pending writes
+    sleep 1
+fi
+
+# Calendar grid
+defaults write br.paker.Calendr show_week_numbers -bool true
+defaults write br.paker.Calendr week_count -int 6
+defaults write br.paker.Calendr event_dots_style -string multiple
+
+# Menu bar item
+defaults write br.paker.Calendr status_item_date_enabled -bool true
+defaults write br.paker.Calendr status_item_date_style -int 2
+
+# Next-event item in the menu bar, looking 2 hours ahead
+defaults write br.paker.Calendr show_event_status_item -bool true
+defaults write br.paker.Calendr event_status_item_check_range -int 2
+defaults write br.paker.Calendr future_events_days -int 0
+
+if [ "$calendr_was_running" = true ]; then
+    open -a Calendr || true
+fi
+
+echo "Calendr configured."
+{{ end -}}

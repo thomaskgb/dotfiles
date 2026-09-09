@@ -41,6 +41,8 @@ packages:
       - stablyai/orca/orca
       - font-meslo-lg-nerd-font
       - caffeine
+      # Menu bar calendar; self-updating, so brew won't upgrade it
+      - calendr
 
   linux:
     # System packages that require apt
