@@ -54,7 +54,17 @@ shape of the commands below, and resolve the right executable (`orca`, `orca-ide
 ## 3. Write the brief before creating anything
 
 The child starts with zero context: no conversation, no reasoning, no idea why. The prompt is
-the entire handover. Cover:
+the entire handover.
+
+**Write it to a file, not into a shell argument.** Put it in
+`~/.local/state/orca-briefs/<task-name>.md` and pass `--prompt "$(cat <path>)"` on create. If
+you ever have to deliver it to an already-running agent instead, send a one-line pointer to
+that file. A long multi-line brief through `terminal send --text` is truncated by the pty,
+and the agent receives only its tail, with the earlier lines leaking in as stray keystrokes.
+It then asks you to resend, which reads as the agent being confused rather than the transport
+being broken.
+
+Cover:
 
 - **Goal**, in one sentence, and what "done" looks like concretely.
 - **Where to look**: the files, functions, or entry points already identified, as paths.
@@ -67,10 +77,16 @@ A brief that fits in two lines usually means the task was too small to spawn.
 
 ## 4. Create it
 
-Agent-first create, so the agent owns the first terminal and no stray shell appears:
+Children run **Opus** (`claude --model opus`). The built-in `--agent claude` launcher picks
+the default model and takes no model flag, so create the worktree bare, open the agent
+terminal yourself with the model set, and hand it a one-line pointer to the brief file:
 
 ```text
-ORCA worktree create --name <task-name> --no-parent --agent claude --prompt "<brief>" --json
+ORCA worktree create --name <task-name> --no-parent --json
+ORCA terminal create --worktree id:<repoId>::<path> --title <task-name> --command 'claude --model opus' --json
+ORCA terminal wait --terminal <handle> --for tui-idle --timeout-ms 60000 --json
+ORCA terminal send --terminal <handle> --text "Read and execute the brief at ~/.local/state/orca-briefs/<task-name>.md" --enter --json
+ORCA worktree set --worktree id:<repoId>::<path> --comment "<what it is doing>" --workspace-status in-progress --json
 ```
 
 - `--no-parent` for independent work, which is the normal case. It also means the branch is
@@ -78,8 +94,30 @@ ORCA worktree create --name <task-name> --no-parent --agent claude --prompt "<br
 - `--parent-worktree active` only for deliberately stacked work, when the child truly builds on
   this branch and the user asked for that.
 - Keep `--name` short and descriptive: it becomes the branch and the card title.
+- Copy the full `worktree.id` (`<repoId>::<path>`) from the create response into every later
+  command; the repo id alone is not a worktree id.
+- A bare create may open a fallback shell tab before your agent terminal. Once the agent is
+  up, `ORCA terminal list --worktree id:<repoId>::<path> --json`, and close the extra one
+  with `ORCA terminal close --terminal <handle> --json` only after `terminal show` confirms
+  it is an idle shell. Never close the agent, and never open a second agent.
 
-## 5. Hand off cleanly
+## 5. When create reports `runtime_unavailable`
+
+On Orca 1.4.x the runtime sometimes drops the connection after doing the work, so the
+response is lost, not the work. Confirm before retrying anything:
+
+```text
+ORCA worktree list --json      # the checkout is usually there; take its full id
+ORCA terminal list --worktree id:<repoId>::<path> --json
+```
+
+If the checkout exists and has no agent terminal, continue from `terminal create` above. If
+it already has one whose title echoes the brief, the agent landed: report it and stop. Never
+create a second agent terminal in the same worktree; two Claude sessions racing one brief in
+one checkout is the failure this step exists to prevent. Metadata does go missing, and
+`worktree set` is safe to repeat.
+
+## 6. Hand off cleanly
 
 - Report the `worktree.id` and the agent terminal handle to the user, then stop.
 - Do not poll the child. A handoff transfers ownership; if the user wants supervision, ask/reply,
