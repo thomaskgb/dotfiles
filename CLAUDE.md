@@ -256,3 +256,10 @@ After making changes:
    time by copying the local entry into `~/.terminfo` under both names. Check a
    host with `zsh -f -c 'zmodload zsh/terminfo; echo ${#terminfo}'`. Zero means
    the entry is missing.
+7. **Hammerspoon app toggles follow AeroSpace, not the other way round**: the
+   toggles (hyper-w, hyper-m, ...) ask AeroSpace which window to focus, so the
+   workspaces in `APP_CONFIG` (`dot_config/hammerspoon/lua/app_launcher.lua`)
+   are only the fallback for launching an app that has no window yet. They must
+   mirror the `on-window-detected` rules in `aerospace.toml`. When they drift,
+   the toggle switches to an empty workspace and the app can end up frontmost
+   but parked in the bottom-right corner with its border highlighted.
