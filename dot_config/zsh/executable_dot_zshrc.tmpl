@@ -62,7 +62,12 @@ eval "$(fzf --zsh)"
 eval "$(zoxide init zsh)"
 
 # fnm - Node version manager (auto-switches based on .nvmrc)
-command -v fnm &>/dev/null && eval "$(fnm env --use-on-cd --shell zsh)"
+# --log-level error: the chpwd hook runs `fnm use`, which otherwise prints
+# "Using Node vX" whenever the resolved version changes. A session that starts
+# by cd-ing into a pinned project emits that line while zsh is still
+# initializing, which trips powerlevel10k's instant-prompt warning. `error`
+# keeps real failures visible; only the informational line is dropped.
+command -v fnm &>/dev/null && eval "$(fnm env --use-on-cd --log-level error --shell zsh)"
 
 export PATH="$HOME/.local/bin:$PATH"
 
