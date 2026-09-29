@@ -8,8 +8,11 @@ description: >-
   session's terminal instead. A light path exists for simple sessions (a
   follow-ups pick-up or close check, anything without a worktree of its own):
   no docs pass, just the loose ends and the tab closed. Use when the user says
-  "wrap up", "wrap-up", "close this session", "close this tab", "close this
-  worktree", "archive this worktree", "archive and close", or "we're done here".
+  "wrap up", "wrap-up", "close this session", "close this tab", "close the
+  task", "close this", "close it", "close this worktree", "archive this
+  worktree", "archive and close", "done", or "we're done here". In a session
+  started from a follow-ups brief, "close the task" means this session, not
+  the ledger item.
 ---
 
 # Wrap up an Orca session
@@ -43,8 +46,13 @@ this session never touched). For those, take the light path:
 - Phase 2 is skipped entirely.
 - Phase 3 is the main-worktree close below (never `worktree rm`: there is no
   worktree of this session's own). If the user's message was itself the close
-  request ("close this tab", "wrap up and close", "done, close it"), that is
-  the confirmation; do not ask again. Otherwise ask once as usual.
+  request ("close this tab", "close the task", "close this", "wrap up and
+  close", "done, close it"), that is the confirmation; do not ask again and do
+  not answer with a status report. Otherwise ask once as usual. In a session
+  that was started from a follow-ups brief, "close the task" always means the
+  session: the ledger item, if it is still open and the user just said it is
+  handled, is closed on the ledger first (`follow-up-ledger.py set <id>
+  --status done --note ...`), and then the tab goes.
 
 A review session that runs in its own `<ticket>-…-review` worktree is **not**
 light: it takes the normal path and archives the worktree.
