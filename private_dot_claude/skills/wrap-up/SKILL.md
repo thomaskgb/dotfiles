@@ -5,9 +5,11 @@ description: >-
   check the project's Notion docs for staleness and update them, then close the
   session. Applies to BOTH kinds of session - in a child worktree it archives
   the worktree, and in a repo's main checkout it deletes nothing and closes the
-  session's terminal instead. Use when the user says "wrap up", "wrap-up",
-  "close this session", "close this worktree", "archive this worktree",
-  "archive and close", or "we're done here".
+  session's terminal instead. A light path exists for simple sessions (a
+  follow-ups pick-up or close check, anything without a worktree of its own):
+  no docs pass, just the loose ends and the tab closed. Use when the user says
+  "wrap up", "wrap-up", "close this session", "close this tab", "close this
+  worktree", "archive this worktree", "archive and close", or "we're done here".
 ---
 
 # Wrap up an Orca session
@@ -21,6 +23,31 @@ is a main checkout - closing it is still the right ending.
 Run the phases in order. Phases 1 and 2 must both finish before phase 3 — the
 last command deletes the checkout and kills this session's terminal, so
 anything left undone stays undone.
+
+## 0. Is this a light session?
+
+Most sessions are not feature work. A session that was started from a
+follow-ups brief (the first message pointed at
+`~/.local/state/orca-briefs/pickup-*.md`, `close-*.md` or `review-*.md`
+while sitting in a main checkout), a quick look-up, a draft, a question
+answered: these have no worktree to archive and no project docs to update, and
+the full wrap-up is wrong for them (the docs pass would pad a Notion page that
+this session never touched). For those, take the light path:
+
+- Phase 1 shrinks to: `git status --short` in the cwd (the checkout must not
+  be left dirty by this session), plus this session's own loose ends: a
+  pending close on the follow-ups ledger that was never confirmed or
+  withdrawn, a draft shown but not put into Slack after approval, an item
+  promised to the ledger but never merged, a child session spawned and not
+  reported back. Say them in one line each if any exist, and stop there.
+- Phase 2 is skipped entirely.
+- Phase 3 is the main-worktree close below (never `worktree rm`: there is no
+  worktree of this session's own). If the user's message was itself the close
+  request ("close this tab", "wrap up and close", "done, close it"), that is
+  the confirmation; do not ask again. Otherwise ask once as usual.
+
+A review session that runs in its own `<ticket>-…-review` worktree is **not**
+light: it takes the normal path and archives the worktree.
 
 ## 1. Verify the work is safe to archive
 
@@ -92,11 +119,14 @@ close this tab/session by closing the session's own terminal (its handle is in
 `$ORCA_TERMINAL_HANDLE`):
 
 ```text
-ORCA terminal close --terminal "$ORCA_TERMINAL_HANDLE" --json
+ORCA terminal close --terminal "$ORCA_TERMINAL_HANDLE" --tab --json
 ```
 
-This kills the terminal the agent runs in, so it must be the very last command
-of the turn, after the final summary text (same rule as `worktree rm`).
+`--tab` matters: without it only the pane's process ends and the empty tab
+stays in Orca's tab strip, which is exactly the "closed but still there"
+leftover. This kills the terminal the agent runs in, so it must be the very
+last command of the turn, after the final summary text (same rule as
+`worktree rm`).
 
 - Resolve the Orca executable per the `orca-cli` skill (usually `orca`;
   `ORCA_CLI_COMMAND` / `orca-dev` / `orca-ide` rules apply). `ORCA` below is
