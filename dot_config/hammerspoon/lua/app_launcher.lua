@@ -2,16 +2,25 @@ local M = {}
 
 local AERO = "/opt/homebrew/bin/aerospace"
 
--- App to workspace mapping
+-- App to workspace mapping.
+-- For a tiled app the workspace is only a fallback, used when AeroSpace knows of
+-- no window for the app yet (not running, or running with its window closed): we
+-- switch there before launching so the new window lands somewhere visible. It must
+-- mirror the on-window-detected rules in aerospace.toml, which decide where the
+-- window really goes. Once a window exists, toggleTiledApp hands AeroSpace the
+-- window itself and lets it pick the workspace (see aerospaceWindowId below).
 -- Floating apps live on workspace "a" at rest, but are pulled to the current workspace when toggled.
 local APP_CONFIG = {
 	["Brave Browser"] = { workspace = "1" },
-	["kitty"] = { workspace = "2" },
+	["kitty"] = { workspace = "t" },
 	["Orca"] = { workspace = "t" },
 	["Obsidian"] = { workspace = "3" },
 	["Notion"] = { workspace = "3" },
-	["Mail"] = { workspace = "4" },
-	["WhatsApp"] = { workspace = "4" },
+	["Mail"] = { workspace = "2" },
+	["Microsoft Outlook"] = { workspace = "2" },
+	["WhatsApp"] = { workspace = "2" },
+	-- No rule of its own in aerospace.toml; the catch-all there sends it to 4.
+	["Claude"] = { workspace = "4" },
 	["Spotify"] = { floating = true },
 	["Todoist"] = { floating = true },
 	["Calendar"] = { floating = true },
@@ -51,6 +60,38 @@ local function getCurrentWorkspace()
 	return "1"
 end
 
+-- Ask AeroSpace for the id of the app's window we should focus. AeroSpace owns
+-- window placement (on-window-detected in aerospace.toml), so it, not the table
+-- above, knows which workspace the window is on; the table used to be trusted and
+-- drifted from it (WhatsApp 4 vs 2), which sent the toggle to an empty workspace.
+-- Hammerspoon and AeroSpace share window ids (both are CGWindowIDs). Prefers the
+-- window we are about to raise, falls back to the app's first window AeroSpace
+-- lists, and returns nil when it lists none.
+local function aerospaceWindowId(app, win)
+	local bundle = app and app:bundleID()
+	if not bundle then
+		return nil
+	end
+
+	local output = hs.execute(
+		AERO .. " list-windows --monitor all --app-bundle-id " .. bundle .. " --format '%{window-id}'"
+	)
+	if not output then
+		return nil
+	end
+
+	local wantedId = win and win:id()
+	local first
+	for line in output:gmatch("%d+") do
+		local id = tonumber(line)
+		first = first or id
+		if wantedId and id == wantedId then
+			return id
+		end
+	end
+	return first
+end
+
 -- Show and focus a tiled app
 local function showApp(app)
 	if not app then return end
@@ -72,14 +113,28 @@ local function showApp(app)
 	end)
 end
 
--- Toggle a tiled app (has fixed workspace)
+-- Toggle a tiled app. `workspace` is the APP_CONFIG fallback, used only when
+-- AeroSpace knows of no window for the app.
 local function toggleTiledApp(appName, workspace)
 	local app = hs.application.get(appName)
 
 	if app and app:isFrontmost() then
 		app:hide()
 	elseif app then
-		hs.execute(AERO .. " workspace " .. workspace)
+		-- Let AeroSpace switch to the workspace that actually holds the window and
+		-- focus that window, so it is laid out on screen before we activate the app.
+		-- Two things go wrong otherwise. Activating a window still parked on a
+		-- hidden workspace makes AeroSpace follow focus, which races the workspace
+		-- switch: lose the race and the window ends up frontmost (border
+		-- highlighted) yet stuck in the bottom-right corner. And a plain
+		-- `workspace N` raises that workspace's most recent window first, so the
+		-- wrong app flashes for a few hundred ms before ours takes over.
+		local windowId = aerospaceWindowId(app, getWindow(app))
+		if windowId then
+			hs.execute(AERO .. " focus --window-id " .. windowId)
+		else
+			hs.execute(AERO .. " workspace " .. workspace)
+		end
 		hs.timer.doAfter(0.1, function()
 			showApp(app)
 		end)
