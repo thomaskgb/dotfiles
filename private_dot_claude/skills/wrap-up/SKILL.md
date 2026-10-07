@@ -43,7 +43,7 @@ this session never touched). For those, take the light path:
   withdrawn, a draft shown but not put into Slack after approval, an item
   promised to the ledger but never merged, a child session spawned and not
   reported back. Say them in one line each if any exist, and stop there.
-- Phase 2 is skipped entirely.
+- Phase 2 is skipped, except the feedback loop (2b), which every session runs.
 - Phase 3 is the main-worktree close below (never `worktree rm`: there is no
   worktree of this session's own). If the user's message was itself the close
   request ("close this tab", "close the task", "close this", "wrap up and
@@ -98,6 +98,48 @@ deployment state, not just the code change.
   `notion-update-page` with `update_content` (targeted old_str/new_str), never
   `replace_content`.
 - If nothing is stale, say so and move on; do not pad the page.
+
+### Close the session's ticket
+
+If the branch or the session carries a ticket id (`ENG-1234`), set that ticket's
+`Status` in the Notion Engineering Tickets database to match where the work
+really is. Merging is not shipping: the manual production migration jobs gate the
+deploy.
+
+- Deployed to production (the master release pipeline is green through
+  `deploy-demo-prod`): **Closed**.
+- Merged to master, production rollout not done yet: **Merged**, and say the
+  migrations are still to trigger.
+- MR still open: **In Review**; leave it, phase 1 already blocks the close.
+
+Fetch the ticket first (it may have been edited since), change only `Status`
+with `update_properties`, and name the ticket and its new status in the summary.
+Skip this for light sessions and sessions without a ticket.
+
+## 2b. Close the feedback loop
+
+Before closing, feed the session's corrections back into what produced the
+work, so the next session starts better.
+
+- List the user's corrections and preferences from this session: a draft
+  rewritten ("too long", "claudish", "that does not exist yet"), a step done
+  in the wrong order, a fact the skill got wrong.
+- For each, find where it belongs: the skill or prompt that produced the
+  work (for follow-ups drafts, `prompts/follow-up-proposal.md` in the
+  sitemark-assistant repo), or a memory file when it is about the user rather
+  than a procedure. Update an existing rule rather than adding a duplicate.
+  A fact about the Sitemark platform is neither: append it as one line to
+  `~/.local/state/platform-notes/inbox.md` (format in the `tidy-skills`
+  skill), which moves it into Notion later.
+- **Incremental changes** (a sentence or a bullet sharpening an existing
+  rule, an example quote): make them now. Skills under `~/.claude` go through
+  chezmoi (`chezmoi add` after editing the target); repo prompts go through a
+  branch and a PR, never main.
+- **Substantial changes** (a new phase, a rule that reverses existing
+  behaviour, a restructure): do not make them. Show the proposed change in
+  one or two lines and wait for approval.
+- Name each change in the summary, one line each. If the session had no
+  corrections, say nothing and move on.
 
 ## 3. Archive the worktree and close the session (LAST)
 
