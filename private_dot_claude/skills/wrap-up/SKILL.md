@@ -128,9 +128,9 @@ work, so the next session starts better.
   work (for follow-ups drafts, `prompts/follow-up-proposal.md` in the
   sitemark-assistant repo), or a memory file when it is about the user rather
   than a procedure. Update an existing rule rather than adding a duplicate.
-  A fact about the Sitemark platform is neither: append it as one line to
-  `~/.local/state/platform-notes/inbox.md` (format in the `tidy-skills`
-  skill), which moves it into Notion later.
+  A fact about the product or systems you work on is neither: append it as
+  one line to `~/.local/state/knowledge-inbox.md` (format in the
+  `tidy-skills` skill), which moves it into the team's docs later.
 - **Incremental changes** (a sentence or a bullet sharpening an existing
   rule, an example quote): make them now. Skills under `~/.claude` go through
   chezmoi (`chezmoi add` after editing the target); repo prompts go through a
