@@ -109,6 +109,8 @@ VENDOR_RULES = [
     ("Netwerkkabel", r"Netwerkkabel\.eu"),
     ("Bartender", r"Bartender App LLC|Bartender Pro"),
     ("Profielgigant", r"Profielgigant"),
+    ("Serviparc", r"Serviparc|Servipark"),
+    ("Orange", r"Orange Belgium"),
 ]
 
 # Invoices Lucy mailed us, or that were CC'd straight to Yuki, so Yuki already
@@ -158,6 +160,8 @@ DATE_OVERRIDES = {
     "Factuur-33209963.pdf": "20260714",
     "Factuur-284632.pdf": "20260909",                # Netwerkkabel, d-m-yyyy
     "invoice_7299-66739_Bartender-App-LLC.pdf": "20260911",  # Paddle, "11th September 2026"
+    "invoice-6abd7d74674bab11452b6d9e.pdf": "20260930",  # Orange via Lucy, Factuurdatum 30/09/2026
+    "invoice-6ac29ddf9dc7567881119a29.pdf": "20260930",  # Serviparc via Lucy, Factuurdatum 30/09/2026
     "Factuur_met_overschrijvingsformulier_13237884.pdf": "20260802",  # date of the Europ Assistance mail
 }
 
@@ -428,6 +432,12 @@ def build_plan():
                              "of": f"{filed[digest]} (already filed)"})
                 continue
             if digest in seen:
+                # The same bytes arrived twice; if this copy came via Lucy,
+                # Yuki has it, so the copy we keep must not be tagged red.
+                if path.name in ALREADY_AT_YUKI:
+                    for kept in plan:
+                        if kept["src"].name == seen[digest] and kept.get("tag") == "to_upload":
+                            kept["tag"] = "yuki"
                 plan.append({"src": path, "action": "duplicate",
                              "of": seen[digest]})
                 continue
