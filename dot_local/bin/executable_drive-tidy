@@ -26,12 +26,12 @@ from pathlib import Path
 DRIVE = Path(
     "/Users/thomas/Library/CloudStorage/GoogleDrive-thomas@tdlx.nl/My Drive"
 )
-FINANCES = DRIVE / "mission-control/2_🏙TDLX/10_TDLX-BE_admin/1_finances"
-INVOICES = FINANCES / "invoices"
+FINANCES = DRIVE / "mission-control/2_🏙TDLX/10_admin/11_finance"
+INVOICES = FINANCES / "transactions/invoices"
 REVIEW = INVOICES / "_review"
-BREMTSTRAAT = DRIVE / "mission-control/3_👫shared/10_admin/16_Bremtstraat"
+BREMTSTRAAT = DRIVE / "mission-control/3_👫shared/10_admin/11_Bremtstraat"
 INBOX = DRIVE / "_inbox"
-ICLOUD_INBOX = Path.home() / "Library/Mobile Documents/com~apple~CloudDocs/inbox"
+ICLOUD_INBOX = Path.home() / "Library/Mobile Documents/com~apple~CloudDocs/_inbox"
 
 # The Drive root should end up empty, so everything loose there is moved
 # somewhere. The other three are inboxes that only give up files this script is
@@ -55,30 +55,27 @@ LEAVE_ALONE = re.compile(r"simulatie|simulation", re.I)
 # to - but these vendors only ever bill the house.
 HOUSEHOLD_ROUTES = [
     (r"energie\.be|afrekening van Energie",
-     BREMTSTRAAT / "8_utilities/energie.be/invoices"),
-    (r"\bfluvius\b", BREMTSTRAAT / "8_utilities/fluvius"),
-    (r"watergroep", BREMTSTRAAT / "8_utilities/watergroep"),
+     BREMTSTRAAT / "utilities/energie.be/invoices"),
+    (r"\bfluvius\b", BREMTSTRAAT / "utilities/fluvius"),
+    (r"watergroep", BREMTSTRAAT / "utilities/watergroep"),
 ]
 
 # Finance paperwork that is not an invoice still has a home of its own.
 # (pattern matched against filename + heading, destination under 1_finances)
 FINANCE_ROUTES = [
     (r"jaarrekening|wettelijke verslaggeving|resultatenrekening"
-     r"|definitieve balans|liquiditeitstest", "jaarrekeningen"),
+     r"|definitieve balans|liquiditeitstest", "filings/annual_accounts"),
     (r"term[_ ]sheet|option_contract|offer_acceptance|claims_sales_purchase"
      r"|sales_contract|aandelenoptie|optifin|warrant",
-     "salary/Thomas/aandelenopties"),
-    (r"bedrijfsvoorheffing", "salary/bedrijfsvoorheffing"),
-    (r"loonfiche|loonbrief|individuele rekening", "salary"),
-    (r"sociale bijdragen|sociaal secretariaat|attest sociale", "sociaal secretariaat"),
-    (r"btw-rekeninguittreksel|btw-aangifte|periodieke aangifte", "BTW"),
-    (r"rekeninguittreksel|creditcard overzicht", "bank"),
+     "payroll/Thomas/aandelenopties"),
+    (r"bedrijfsvoorheffing", "filings/payroll_withholding_tax"),
+    (r"loonfiche|loonbrief|individuele rekening", "payroll"),
+    (r"sociale bijdragen|sociaal secretariaat|attest sociale", "filings/social_contributions"),
+    (r"btw-rekeninguittreksel|btw-aangifte|periodieke aangifte", "filings/vat"),
+    (r"rekeninguittreksel|creditcard overzicht", "transactions/bank"),
 ]
 LEDGER_DIR = Path.home() / ".local/state/drive-tidy"
 
-# The year whose quarters live directly in invoices/Q1..Q4. Older years are
-# nested one level down (invoices/2025/Q3), which is the layout already in use.
-CURRENT_BOOK_YEAR = 2026
 
 # Finder tag name -> macOS colour index. The name is what the user reads in the
 # sidebar, so it says what it means rather than naming a colour. Indices matter:
@@ -108,6 +105,10 @@ VENDOR_RULES = [
     ("Allianz", r"Allianz"),
     ("Liantis", r"Liantis"),
     ("Perplexity", r"Perplexity"),
+    ("MijnHost", r"mijn\.host"),
+    ("Netwerkkabel", r"Netwerkkabel\.eu"),
+    ("Bartender", r"Bartender App LLC|Bartender Pro"),
+    ("Profielgigant", r"Profielgigant"),
 ]
 
 # Invoices Lucy mailed us, or that were CC'd straight to Yuki, so Yuki already
@@ -155,7 +156,8 @@ DATE_OVERRIDES = {
     "invoice_263627890.pdf": "20260716",             # Energie.be, period to 01.07
     "DigitalOcean Invoice 2026 Jul (9899505-550616058).pdf": "20260801",
     "Factuur-33209963.pdf": "20260714",
-    "07-076 TDLX Enterprise (P-Patr-M-V)  .pdf": "20260720",   # Allianz premiebericht
+    "Factuur-284632.pdf": "20260909",                # Netwerkkabel, d-m-yyyy
+    "invoice_7299-66739_Bartender-App-LLC.pdf": "20260911",  # Paddle, "11th September 2026"
     "Factuur_met_overschrijvingsformulier_13237884.pdf": "20260802",  # date of the Europ Assistance mail
 }
 
@@ -263,10 +265,9 @@ def find_vendor(haystack):
 
 
 def quarter_dir(date):
-    q = f"Q{(date.month - 1) // 3 + 1}"
-    if date.year == CURRENT_BOOK_YEAR:
-        return INVOICES / q
-    return INVOICES / str(date.year) / q
+    """Every year nests the same way (invoices/2026/Q3), so nothing has to be
+    migrated each January."""
+    return INVOICES / str(date.year) / f"Q{(date.month - 1) // 3 + 1}"
 
 
 def unique_path(target):
@@ -328,7 +329,7 @@ def classify(path):
         if re.search(pattern, f"{name}\n{heading}", re.I):
             year = re.search(r"(20\d{2})", name)
             dest = FINANCES / subfolder
-            if subfolder == "jaarrekeningen" and year:
+            if subfolder == "filings/annual_accounts" and year:
                 dest = dest / year.group(1)
             return {"action": "finance", "dest_dir": dest}
 
@@ -455,7 +456,10 @@ def build_plan():
         elif item["action"] == "household":
             item["dest"] = item["dest_dir"] / path.name
         elif item["action"] == "finance":
-            item["dest"] = item["dest_dir"] / path.name
+            # A _2 suffix only ever comes from parking a name clash in
+            # _review; strip it so the clash is still seen on re-audit.
+            canonical = re.sub(r"_\d+(?=\.[^.]+$)", "", path.name)
+            item["dest"] = item["dest_dir"] / canonical
             if item["dest"].exists():
                 item = {"src": path, "action": "review",
                         "dest": REVIEW / path.name,
