@@ -12,7 +12,6 @@ local AERO = "/opt/homebrew/bin/aerospace"
 -- Floating apps live on workspace "a" at rest, but are pulled to the current workspace when toggled.
 local APP_CONFIG = {
 	["Brave Browser"] = { workspace = "1" },
-	["kitty"] = { workspace = "t" },
 	["Orca"] = { workspace = "t" },
 	["Obsidian"] = { workspace = "3" },
 	["Notion"] = { workspace = "3" },
