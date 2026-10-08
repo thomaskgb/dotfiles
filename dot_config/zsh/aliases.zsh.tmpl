@@ -29,23 +29,6 @@ alias vim="nvim"
 alias vi="nvim"
 
 
-{{ if eq .chezmoi.os "darwin" -}}
-## kitty shortcuts
-alias icat='kitty +kitten icat --fit=height'
-
-# Route ssh through kitty's own kitten. It copies kitty's terminfo to the remote
-# host on connect, so TERM=xterm-kitty resolves there and zsh can draw the line
-# editor correctly. Without it a fresh host has no xterm-kitty entry, $terminfo
-# comes back empty, text jumps around while typing and zsh-autocomplete fails on
-# terminfo[kcbt].
-#
-# Guarded on the binary being present: an alias pointing at a missing command
-# would break every ssh on this machine. Aliases only expand in command
-# position, so `rsync -e ssh`, scripts and non-interactive shells still get the
-# real ssh.
-command -v kitten >/dev/null 2>&1 && alias ssh='kitten ssh'
-
-{{ end -}}
 
 # tmux aliasses
 alias tns="tmux new-session -s test"
