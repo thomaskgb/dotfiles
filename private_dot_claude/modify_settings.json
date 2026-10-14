@@ -5,9 +5,10 @@
 # Claude Code and its ecosystem rewrite ~/.claude/settings.json at runtime, so a
 # verbatim copy drifts constantly and every `chezmoi update` asks whether to
 # overwrite it. The keys below are shared across machines; `hooks`,
-# `enabledPlugins` and `autoMode` are machine-local (agent tooling and Claude
-# Code itself stamp those in at runtime) and are carried over from whatever is
-# already on disk.
+# `enabledPlugins`, `autoMode` and `extraKnownMarketplaces` are machine-local
+# (agent tooling and Claude Code itself stamp those in at runtime, and work
+# marketplaces do not belong in this public repo) and are carried over from
+# whatever is already on disk.
 set -e
 
 managed=$(
@@ -48,11 +49,17 @@ managed=$(
   },
   "statusLine": {
     "type": "command",
-    "command": "env FORCE_COLOR=3 npx -y ccstatusline@latest",
+    "command": "env FORCE_COLOR=3 sh -c 'command -v ccstatusline >/dev/null && exec ccstatusline || exec npx -y ccstatusline@latest'",
     "padding": 0
   },
   "customInstructions": "Always test changes after implementing them.",
   "model": "opus",
+  "modelSettings": {
+    "claude-fable-5-1": {
+      "effortLevel": "high"
+    }
+  },
+  "skipWorkflowUsageWarning": true,
   "effortLevel": "high",
   "env": {
     "CLAUDE_CODE_ENABLE_TODO_TOOLS": "1"
@@ -71,6 +78,7 @@ if command -v jq >/dev/null 2>&1; then
 		+ (if has("hooks") then {hooks} else {} end)
 		+ (if has("enabledPlugins") then {enabledPlugins} else {} end)
 		+ (if has("autoMode") then {autoMode} else {} end)
+		+ (if has("extraKnownMarketplaces") then {extraKnownMarketplaces} else {} end)
 	'
 	exit 0
 fi
@@ -89,7 +97,7 @@ except ValueError:
     current = {}
 if not isinstance(current, dict):
     current = {}
-for key in ("hooks", "enabledPlugins", "autoMode"):
+for key in ("hooks", "enabledPlugins", "autoMode", "extraKnownMarketplaces"):
     if key in current:
         managed[key] = current[key]
 json.dump(managed, sys.stdout, indent=2, ensure_ascii=False)
