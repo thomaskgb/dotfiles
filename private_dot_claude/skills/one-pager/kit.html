@@ -1,44 +1,57 @@
-<title>{{TITLE}}</title>
+<title>One-pager kit</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
-/* One-pager skeleton. Each .sheet is one A4 page; every size inside a sheet is in cqw
-   (1cqw = 1% of the sheet width, 7.94px at full A4 width), so it scales on screen and
-   prints at 210 x 297 mm. The sheet is paper and stays light; only the desk follows the theme.
+/* One-pager kit: the A4 mechanics plus one specimen of each component.
+   Copy it, keep the shell (tokens, desk, bar, sheet, print rules, script), build the sheets from
+   the components that fit the content, and delete the CSS of the ones not used.
+   Each .sheet is one A4 page; every size inside a sheet is in cqw (1cqw = 1% of the sheet width,
+   7.94px at full A4 width), so it scales on screen and prints at 210 x 297 mm.
+   The sheet is paper and stays light; only the desk around it follows the theme.
    Swap the colour and font tokens for a house style; keep the names. */
 :root {
   --desk: #eceff3; --bg: #ffffff; --surface: #f4f6f9; --fg: #16202c; --muted: #5c6878; --line: #e1e6ec;
   --accent: #2456b8; --accent-soft: #e8eefa; --on-accent: #ffffff; --bar-ink: #5c6878;
-  --bad: #b8402c; --warn: #9a6400;
+  --good: #1d7a52; --bad: #b8402c; --warn: #9a6400;
   --font: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --mono: ui-monospace, Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --desk: #10151c; --bar-ink: #9aa6b6; color-scheme: dark } }
 :root[data-theme="dark"] { --desk: #10151c; --bar-ink: #9aa6b6; color-scheme: dark }
 
+/* ---- Shell: keep ---- */
 body { background: var(--desk); color: var(--fg); font-family: var(--font); }
 .desk { padding-block: 20px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 20px; justify-items: center; }
 .bar { width: min(100%, 794px); display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--bar-ink); }
 .print { font: 600 13px/1 var(--font); background: var(--accent); color: var(--on-accent); text-decoration: none; padding: 10px 16px; border-radius: 999px; display: inline-flex; gap: 8px; align-items: center; }
 .print:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .print svg { width: 14px; height: 14px; }
-
 .sheet { width: min(100%, 794px); max-width: 100%; aspect-ratio: 210 / 297; container-type: inline-size; background: var(--bg); color: var(--fg); box-shadow: 0 18px 50px -30px rgba(10, 14, 26, 0.5); overflow: hidden; }
 .page { height: 100%; box-sizing: border-box; padding: 5cqw 5.5cqw 4.5cqw; display: flex; flex-direction: column; gap: 1.8cqw; font-size: 1.32cqw; line-height: 1.5; }
 h1, h3, h4, p { margin: 0; }
 h1 { font-size: 3.4cqw; font-weight: 700; line-height: 1.2; text-wrap: balance; }
 h3 { font-size: 1.4cqw; font-weight: 600; line-height: 1.3; }
 a { color: var(--accent); text-underline-offset: 0.2cqw; }
+.muted { color: var(--muted); }
 .top { display: flex; justify-content: space-between; align-items: center; min-height: 2.4cqw; }
 .logo svg { height: 2.4cqw; width: auto; display: block; }
 .stamp { font-size: 1.1cqw; color: var(--muted); }
+/* One heading style for every section on a page; caps or not, pick once per page. */
+.sec-h { font-size: 1.7cqw; font-weight: 700; letter-spacing: 0.02em; }
+.sec-h.caps { text-transform: uppercase; letter-spacing: 0.04em; }
+.foot { margin-top: auto; display: flex; justify-content: space-between; gap: 2cqw; font-size: 1cqw; color: var(--muted); border-top: 1px solid var(--line); padding-top: 1cqw; }
 
-/* Summary: what changes, not a recap */
+/* ---- Component: text ---- */
+.text { display: grid; gap: 0.8cqw; max-width: 72cqw; }
+.text p { font-size: 1.35cqw; }
+
+/* ---- Component: summary ---- */
 .answer { background: var(--accent-soft); border-radius: 1.5cqw; padding: 1.4cqw 2cqw; display: grid; gap: 0.8cqw; }
 .answer ul { margin: 0; padding-left: 1.8cqw; display: grid; gap: 0.4cqw; font-size: 1.35cqw; }
 
-/* Figures on a light surface. Section headings: one size, caps. */
+/* ---- Surface for figures (rows, timeline, diagram) ---- */
 .figure { background: var(--surface); border-radius: 1.5cqw; padding: 1.6cqw 2cqw; display: grid; gap: 1.1cqw; }
-.big-h { font-size: 1.9cqw; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* ---- Component: block rows ---- */
 .row { display: grid; grid-template-columns: 9cqw 1fr; gap: 1.2cqw; align-items: center; }
 .row > span { font-size: 1.05cqw; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
 .row.accent > span { color: var(--accent); }
@@ -51,17 +64,26 @@ a { color: var(--accent); text-underline-offset: 0.2cqw; }
 .blk.neg { border-color: var(--bad); color: var(--bad); }
 .blk.neg small { color: var(--bad); }
 
-/* The one big block for the main thing */
+/* ---- Component: big block ---- */
 .feature { background: var(--bg); border: 2px solid var(--accent); border-radius: 1.5cqw; padding: 1.6cqw 2cqw 1.8cqw; display: grid; gap: 1cqw; }
 .feature-head { display: flex; align-items: baseline; gap: 1cqw; flex-wrap: wrap; }
 .feature-head b { font-size: 1.9cqw; color: var(--accent); }
-.feature-head .unit { font-family: var(--mono); font-size: 1.08cqw; color: var(--accent); }
+.unit { font-family: var(--mono); font-size: 1.08cqw; color: var(--accent); }
+
+/* ---- Component: builder (pick one per row); also used inside a big block ---- */
+.builder { display: grid; gap: 1cqw; }
+.brow { display: grid; grid-template-columns: 12cqw 1fr; gap: 1.4cqw; align-items: start; }
+.blabel { display: grid; gap: 0.1cqw; padding-top: 0.6cqw; }
+.blabel b { font-size: 1.15cqw; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
+.blabel span { font-size: 1.08cqw; color: var(--muted); }
 .opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8cqw; }
-.opt { background: var(--surface); border: 1px solid var(--line); border-radius: 1.1cqw; padding: 1cqw 1.3cqw; display: grid; gap: 0.1cqw; align-content: start; font-size: 1.15cqw; line-height: 1.4; }
-.opt b { font-size: 1.4cqw; }
+.opts.two { grid-template-columns: repeat(2, 1fr); }
+.opt { background: var(--surface); border: 1px solid var(--line); border-radius: 1.1cqw; padding: 0.9cqw 1.2cqw; display: grid; gap: 0.1cqw; align-content: start; font-size: 1.15cqw; line-height: 1.4; }
+.opt.pick { background: var(--bg); border: 2px solid var(--accent); padding: calc(0.9cqw - 1px) calc(1.2cqw - 1px); }
+.opt b { font-size: 1.35cqw; }
 .opt .who { color: var(--muted); }
 
-/* Timeline: date and title only */
+/* ---- Component: timeline ---- */
 .timeline { display: grid; grid-template-columns: repeat(4, 1fr); row-gap: 0.8cqw; }
 .step { display: grid; gap: 0.1cqw; padding: 2cqw 1.2cqw 0 0; position: relative; font-size: 1.05cqw; line-height: 1.35; align-content: start; }
 .step::before { content: ""; position: absolute; top: 0.6cqw; left: 0; right: 0; height: 0.25cqw; background: var(--line); }
@@ -71,19 +93,38 @@ a { color: var(--accent); text-underline-offset: 0.2cqw; }
 .step strong { font-size: 1.15cqw; font-weight: 600; line-height: 1.3; }
 .track { grid-column: 2 / 5; border: 1px dashed var(--accent); border-radius: 1cqw; padding: 0.5cqw 1cqw; display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 1cqw; font-size: 1.15cqw; background: var(--bg); }
 
-/* Cards at the end */
+/* ---- Component: diagram (inline SVG; sizes in viewBox units, colours from tokens) ---- */
+.diagram svg { width: 100%; height: auto; display: block; }
+.diagram .node { fill: var(--bg); stroke: var(--line); stroke-width: 1.5; }
+.diagram .node.key { fill: var(--accent); stroke: var(--accent); }
+.diagram .lbl { font: 600 15px var(--font); fill: var(--fg); }
+.diagram .lbl.on-key { fill: var(--on-accent); }
+.diagram .sub { font: 400 12px var(--font); fill: var(--muted); }
+.diagram .edge { stroke: var(--muted); stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+.diagram .edge.soft { stroke-dasharray: 5 4; }
+.diagram .head { fill: var(--muted); }
+
+/* ---- Component: table ---- */
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 1.2cqw; }
+th, td { text-align: left; padding: 0.7cqw 1cqw 0.7cqw 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 0.95cqw; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; padding-right: 0; }
+tr.total td { font-weight: 700; border-bottom: 0; border-top: 0.2cqw solid var(--fg); }
+
+/* ---- Component: cards ---- */
 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5cqw; }
 .card { border: 1px solid var(--line); border-radius: 1.5cqw; padding: 1.3cqw 1.8cqw; display: grid; gap: 0.7cqw; align-content: start; font-size: 1.22cqw; }
 .card h4 { font-size: 1.05cqw; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
 .card h4.warn { color: var(--warn); }
+.card h4.good { color: var(--good); }
 ul.plain { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4cqw; }
 ul.plain li { display: grid; grid-template-columns: 1.4cqw 1fr; gap: 0.8cqw; align-items: baseline; }
 ul.plain li::before { content: ""; width: 0.9cqw; height: 0.9cqw; border-radius: 50%; background: var(--line); }
 ul.plain li.warn::before { background: var(--warn); }
+ul.plain li.good::before { background: var(--good); }
 ul.plain li em { font-style: normal; color: var(--muted); }
 ul.plain.two-col { grid-template-columns: 1fr 1fr; column-gap: 2.4cqw; }
-
-.foot { margin-top: auto; display: flex; justify-content: space-between; gap: 2cqw; font-size: 1cqw; color: var(--muted); border-top: 1px solid var(--line); padding-top: 1cqw; }
 
 @media print {
   @page { size: A4; margin: 0; }
@@ -100,27 +141,33 @@ ul.plain.two-col { grid-template-columns: 1fr 1fr; column-gap: 2.4cqw; }
 <div class="desk">
 
 <div class="bar">
-  <span>1 page · A4</span>
+  <span>2 pages · A4</span>
   <a class="print" id="print-pdf" href="{{PDF}}" data-filename="{{FILENAME}}.pdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><rect x="6" y="14" width="12" height="7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/></svg><span id="print-label">Print (PDF)</span></a>
 </div>
 
 <article class="sheet" aria-label="Page 1">
 <div class="page">
   <div class="top"><div class="logo">{{LOGO}}</div><span class="stamp">{{DATE}}</span></div>
-
   <h1>{{TITLE}}</h1>
 
+  <!-- KIT: summary. What changes, in three or four lines. -->
   <div class="answer">
     <h3>Summary</h3>
     <ul>
-      <li><strong>Main change:</strong> one line on what is different from today.</li>
+      <li><strong>Main change:</strong> one line on what is different.</li>
       <li><strong>Second change:</strong> one line.</li>
-      <li><strong>What stays the same:</strong> one line.</li>
     </ul>
   </div>
 
+  <!-- KIT: text. A short paragraph when the point is an argument, not a shape. -->
+  <section class="text">
+    <h3 class="sec-h">Why now</h3>
+    <p>Two or three sentences. Keep paragraphs short and the line length near 70 characters.</p>
+  </section>
+
+  <!-- KIT: block rows. Before and after, or what something is made of. -->
   <section class="figure">
-    <h3 class="big-h">Today and next</h3>
+    <h3 class="sec-h">Today and next</h3>
     <div class="row"><span>Today</span>
       <div class="blocks">
         <div class="blk">Part A<small>unit</small></div>
@@ -135,35 +182,87 @@ ul.plain.two-col { grid-template-columns: 1fr 1fr; column-gap: 2.4cqw; }
       </div></div>
   </section>
 
+  <!-- KIT: big block. The one thing being proposed; may hold a builder. -->
   <section class="feature">
     <div class="feature-head"><b>The main thing</b><span class="unit">unit</span></div>
-    <div class="opts">
-      <div class="opt"><b>Option 1</b><span>What it does</span></div>
-      <div class="opt"><b>Option 2</b><span>What it does</span></div>
-      <div class="opt"><b>Option 3</b><span class="who">Short note</span></div>
+    <!-- KIT: builder. Modules or options: one row per choice, the default picked. -->
+    <div class="builder">
+      <div class="brow">
+        <div class="blabel"><b>Choice</b><span>What it decides</span></div>
+        <div class="opts">
+          <div class="opt"><b>Option 1</b><span>What it does</span></div>
+          <div class="opt pick"><b>Option 2</b><span>What it does</span></div>
+          <div class="opt"><b>Option 3</b><span class="who">Short note</span></div>
+        </div>
+      </div>
+      <div class="brow">
+        <div class="blabel"><b>Choice</b><span>What it decides</span></div>
+        <div class="opts two">
+          <div class="opt pick"><b>Option A</b><span>What it does</span></div>
+          <div class="opt"><b>Option B</b><span>What it does</span></div>
+        </div>
+      </div>
     </div>
   </section>
 
+  <div class="foot"><span>Sources: <a href="https://example.com">Source name</a></span><span>1 / 2</span></div>
+</div>
+</article>
+
+<article class="sheet" aria-label="Page 2">
+<div class="page">
+  <div class="top"><div class="logo">{{LOGO}}</div><span class="stamp">{{DATE}}</span></div>
+
+  <!-- KIT: timeline. A plan: date and title per step; a dashed track for parallel work. -->
   <section class="figure">
-    <h3 class="big-h">Plan</h3>
+    <h3 class="sec-h">Plan</h3>
     <div class="timeline">
       <div class="step"><span class="when">Date</span><strong>Step</strong></div>
       <div class="step later"><span class="when">Date</span><strong>Step</strong></div>
       <div class="step later"><span class="when">Date</span><strong>Step</strong></div>
       <div class="step later"><span class="when">Date</span><strong>Step</strong></div>
-      <div class="track"><span class="when">Parallel track</span><strong>Other work</strong></div>
+      <div class="track"><span class="when">Parallel</span><strong>Other work</strong></div>
     </div>
   </section>
 
-  <div class="card">
-    <h4 class="warn">Open questions</h4>
-    <ul class="plain two-col">
-      <li class="warn"><span>Question in one line? <em>Owner</em></span></li>
-      <li class="warn"><span>Question in one line? <em>Owner</em></span></li>
-    </ul>
+  <!-- KIT: diagram. How something works: a flow, a loop, who hands what to whom. -->
+  <section class="figure diagram">
+    <h3 class="sec-h">How it works</h3>
+    <svg viewBox="0 0 700 120" role="img" aria-label="Input goes to a process, which produces an output and feeds back">
+      <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0 0L10 5L0 10z"/></marker></defs>
+      <rect class="node" x="10" y="30" width="170" height="56" rx="10"/><text class="lbl" x="95" y="63" text-anchor="middle">Input</text>
+      <rect class="node key" x="265" y="30" width="170" height="56" rx="10"/><text class="lbl on-key" x="350" y="63" text-anchor="middle">Process</text>
+      <rect class="node" x="520" y="30" width="170" height="56" rx="10"/><text class="lbl" x="605" y="63" text-anchor="middle">Output</text>
+      <path class="edge" d="M180 58H262"/><path class="edge" d="M435 58H517"/>
+      <path class="edge soft" d="M605 86V108H350V89"/><text class="sub" x="478" y="104" text-anchor="middle">feedback</text>
+    </svg>
+  </section>
+
+  <!-- KIT: table. Short enumerable facts that line up in columns. -->
+  <section class="tbl">
+    <table>
+      <thead><tr><th>Item</th><th>Detail</th><th class="n">Value</th></tr></thead>
+      <tbody>
+        <tr><td>Row</td><td>Detail</td><td class="n">10</td></tr>
+        <tr><td>Row</td><td>Detail</td><td class="n">20</td></tr>
+        <tr class="total"><td>Total</td><td></td><td class="n">30</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- KIT: cards. Open questions, decisions taken, risks: one line each, owner in grey. -->
+  <div class="cols">
+    <div class="card">
+      <h4 class="good">Decided</h4>
+      <ul class="plain"><li class="good"><span>Decision in one line <em>Owner</em></span></li></ul>
+    </div>
+    <div class="card">
+      <h4 class="warn">Open questions</h4>
+      <ul class="plain"><li class="warn"><span>Question in one line? <em>Owner</em></span></li></ul>
+    </div>
   </div>
 
-  <div class="foot"><span>Sources: <a href="https://example.com">Source name</a></span><span>1 / 1</span></div>
+  <div class="foot"><span></span><span>2 / 2</span></div>
 </div>
 </article>
 
