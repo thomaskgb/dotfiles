@@ -13,6 +13,8 @@ local AERO = "/opt/homebrew/bin/aerospace"
 local APP_CONFIG = {
 	["Brave Browser"] = { workspace = "1" },
 	["Orca"] = { workspace = "t" },
+	-- The follow-ups board as a Brave app; workspace h, see aerospace.toml.
+	["Havoc"] = { workspace = "h" },
 	["Obsidian"] = { workspace = "3" },
 	["Notion"] = { workspace = "3" },
 	["Mail"] = { workspace = "2" },
@@ -140,7 +142,11 @@ local function toggleTiledApp(appName, workspace)
 	else
 		hs.execute(AERO .. " workspace " .. workspace)
 		hs.timer.doAfter(0.1, function()
-			hs.application.launchOrFocus(appName)
+			-- launchOrFocus finds apps by name in /Applications, not a Brave web app
+			-- (Havoc) in ~/Applications/Brave Browser Apps; `open -a` finds both.
+			if not hs.application.launchOrFocus(appName) then
+				hs.task.new("/usr/bin/open", nil, { "-a", appName }):start()
+			end
 		end)
 	end
 end
