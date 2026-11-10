@@ -10,7 +10,7 @@ start-at-login = true
 # deliberately absent: it was never inferred either, because it is only reached
 # from Hammerspoon (hyper-a) and from the on-window-detected rules below, so it
 # exists on demand rather than permanently.
-persistent-workspaces = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 't']
+persistent-workspaces = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 't', 'h']
 
 # Enable normalizations for better automatic tiling behavior
 enable-normalization-flatten-containers = false
@@ -167,6 +167,12 @@ exec-on-workspace-change = ['/bin/bash', '-c',
     if.app-id = 'com.stablyai.orca'
     run = "move-node-to-workspace t"
 
+# Havoc, the follow-ups board installed as a Brave app, has a workspace of its own.
+# Matched by name: the Brave app id is a hash that changes when the app is reinstalled.
+[[on-window-detected]]
+    if.app-name-regex-substring = '^Havoc$'
+    run = "move-node-to-workspace h"
+
 # Obsidian → workspace 3
 [[on-window-detected]]
     if.app-id = "md.obsidian"
@@ -261,6 +267,7 @@ exec-on-workspace-change = ['/bin/bash', '-c',
     4 = 'main'
     5 = 'main'
     t = 'main'
+    h = 'main'
     a = 'main'
     6 = 'secondary'
     7 = 'secondary'
