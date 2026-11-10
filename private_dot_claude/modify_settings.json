@@ -60,6 +60,7 @@ managed=$(
     }
   },
   "skipWorkflowUsageWarning": true,
+  "idleCompaction": false,
   "effortLevel": "high",
   "env": {
     "CLAUDE_CODE_ENABLE_TODO_TOOLS": "1"
