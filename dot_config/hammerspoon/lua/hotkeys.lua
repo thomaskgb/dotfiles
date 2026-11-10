@@ -14,9 +14,20 @@ hs.hotkey.bind(HYPER, "space", function()
 	appLauncher.toggleApp("Orca")
 end)
 
+-- t for tasks: Havoc, the follow-ups board, on its own workspace. Todoist moved to d.
 hs.hotkey.bind(HYPER, "t", function()
+	appLauncher.toggleApp("Havoc")
+end)
+
+hs.hotkey.bind(HYPER, "d", function()
 	appLauncher.toggleApp("Todoist")
 end)
+
+-- Havoc opens at login, in the background (open -g), so it is there for hyper-t.
+-- Only when it is not running: a Hammerspoon reload must not pull it forward.
+if not hs.application.get("Havoc") then
+	hs.task.new("/usr/bin/open", nil, { "-g", "-a", "Havoc" }):start()
+end
 
 hs.hotkey.bind(HYPER, "b", function()
 	appLauncher.toggleApp("Brave Browser")
