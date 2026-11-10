@@ -76,6 +76,42 @@ flag them clearly to the user and do NOT archive. End the turn with the list of
 remaining work instead. Only when nothing is left proceed to phases 2 and 3
 (phase 3 still ends with its one final close confirmation).
 
+## 1b. Sweep the children this session spawned
+
+Phase 1 only looks at *this* worktree, which is why finished child worktrees
+pile up as empty cards: their agent exits or gets closed, nobody runs
+`worktree rm`, and the checkout stays in the workspace list forever. The user
+reported this on 2026-10-09 as "child sessions don't close, they stay empty".
+
+List every child and sort it into one of three, by its terminals and its git
+state:
+
+```text
+ORCA worktree list --json          # children carry parentWorktreeId = this worktree
+ORCA terminal list --worktree id:<repoId>::<path> --json
+```
+
+- **Still working** (a live agent terminal): leave it alone and name it in the
+  summary. A child mid-task is a reason not to close this session, not something
+  to clean up.
+- **Finished and clean** (no agent terminal, `git status --short` empty, nothing
+  unpushed): archive it, which is what actually removes the card.
+
+  ```text
+  ORCA worktree set --worktree id:<repoId>::<path> --workspace-status completed --json
+  ORCA worktree rm  --worktree id:<repoId>::<path> --json
+  ```
+
+- **Finished but dirty** (uncommitted work, unpushed commits, or an open MR):
+  **never remove it.** List it for the user with what it is holding, and let
+  them decide. `worktree rm` deletes the checkout.
+
+**Closing a terminal is not closing a session.** `terminal close` ends the
+agent and leaves the worktree behind, which is the leftover being complained
+about. For a review worktree that is read-only and has nothing to keep, the
+close is `worktree rm`, not `terminal close`. Check git state first all the
+same: a read-only review that happened to write a file still has work in it.
+
 ## 2. Check the project's Notion docs
 
 The point: docs should describe reality *after* this session's work, including
@@ -101,19 +137,18 @@ deployment state, not just the code change.
 
 ### Close the session's ticket
 
-If the branch or the session carries a ticket id (`ENG-1234`), set that ticket's
-`Status` in the Notion Engineering Tickets database to match where the work
-really is. Merging is not shipping: the manual production migration jobs gate the
-deploy.
+If the branch or the session carries a ticket id, set that ticket's status in
+the tracker to match where the work really is. Merging is not shipping when a
+manual production step gates the deploy. Read `~/.claude/wrap-up.local.md` first
+if it exists: it names the tracker, its statuses and what counts as deployed.
 
-- Deployed to production (the master release pipeline is green through
-  `deploy-demo-prod`): **Closed**.
-- Merged to master, production rollout not done yet: **Merged**, and say the
-  migrations are still to trigger.
-- MR still open: **In Review**; leave it, phase 1 already blocks the close.
+- Deployed to production: the closed status.
+- Merged, production rollout not done yet: the merged status, and say what is
+  still to trigger.
+- MR or PR still open: in review; leave it, phase 1 already blocks the close.
 
-Fetch the ticket first (it may have been edited since), change only `Status`
-with `update_properties`, and name the ticket and its new status in the summary.
+Fetch the ticket first (it may have been edited since), change only the status field
+and name the ticket and its new status in the summary.
 Skip this for light sessions and sessions without a ticket.
 
 ## 2b. Close the feedback loop
@@ -125,8 +160,8 @@ work, so the next session starts better.
   rewritten ("too long", "claudish", "that does not exist yet"), a step done
   in the wrong order, a fact the skill got wrong.
 - For each, find where it belongs: the skill or prompt that produced the
-  work (for follow-ups drafts, `prompts/follow-up-proposal.md` in the
-  sitemark-assistant repo), or a memory file when it is about the user rather
+  work (the local settings file names repo prompts behind drafts), or a
+  memory file when it is about the user rather
   than a procedure. Update an existing rule rather than adding a duplicate.
   A fact about the product or systems you work on is neither: append it as
   one line to `~/.local/state/knowledge-inbox.md` (format in the
